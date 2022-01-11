@@ -5,10 +5,10 @@ _by Julian Mierisch and Anna Martynova_
 
 
 ```python
-print('Hello World1')
+print('Hello World2')
 ```
 
-    Hello World
+    Hello World2
 
 
 
