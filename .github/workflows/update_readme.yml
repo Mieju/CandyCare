@@ -30,8 +30,8 @@ jobs:
         git rm README.md
         git mv CandyCare.md README.md
         git commit -m "Convert CandyCare.ipynb to README.md" -a
+        
     - name: Push changes
-    
       if: success()
       uses: ad-m/github-push-action@master
       with:
