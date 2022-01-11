@@ -22,7 +22,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install nbconvert
-        jupyter nbconvert --template "pythoncodeblocks.tpl" --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown --output "README.md" "CandyCare.ipynb"
+        jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown --output "README.md" "CandyCare.ipynb"
     - name: Commit files
       run: |
         git config --local user.email "action@github.com"
