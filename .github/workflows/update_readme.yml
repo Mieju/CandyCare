@@ -26,9 +26,9 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
+        git add CandyCare.md
         git mv CandyCare.md README.md
-        git add README.md
-        git commit -m "Convert README.ipynb to README.md" -a
+        git commit -m "Convert CandyCare.ipynb to README.md" -a
     - name: Push changes
       if: success()
       uses: ad-m/github-push-action@master
