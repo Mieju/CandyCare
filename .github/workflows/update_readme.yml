@@ -21,14 +21,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install nbconvert
-        jupyter nbconvert --to markdown CandyCare.ipynb
+        jupyter nbconvert --to markdown CandyCare.ipynb -output "README.md"
     - name: Commit files
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add CandyCare.md
-        git rm README.md
-        git mv CandyCare.md README.md
+        git add README.md
         git commit -m "Convert CandyCare.ipynb to README.md" -a
         
     - name: Push changes
