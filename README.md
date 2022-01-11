@@ -12,5 +12,9 @@ import pandas as pd
 
 ``` python
 candyData = pd.read_csv('candy-data.csv')
-candyData.head()
+candyData
+```
+
+``` python
+
 ```
