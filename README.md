@@ -3,13 +3,12 @@
 __PML WS 2021/22__ <br>
 _by Julian Mierisch and Anna Martynova_
 
+### Import packages and data
+
 
 ```python
-print('Hello World2')
+import os
 ```
-
-    Hello World2
-
 
 
 ```python
