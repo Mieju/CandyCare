@@ -3,12 +3,20 @@
 __PML WS 2021/22__ <br>
 _by Julian Mierisch and Anna Martynova_
 
+### Goals
+1. Make Model which predicts which win percentage a given new candy has
+2. Predict which combination has highest win propability
+3. Cluster data?
+
 ### Import packages and data
 
 
 ```python
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
+
 ```
 
 
@@ -235,6 +243,34 @@ candyData
 <p>85 rows × 13 columns</p>
 </div>
 
+
+
+### Data exploration 
+
+
+```python
+#Show distribution of candy attributes in dataset
+candyAttributes = candyData.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+data = {'Attributes': candyAttributes.columns, 'Values': candyAttributes.sum()/len(candyAttributes)}  
+candyAttrPercent = pd.DataFrame(data).reset_index().drop(columns=['index']).sort_values(by=['Values'])
+
+fig, ax = plt.subplots()
+def add_value_label(x_list,y_list):
+    for i in range(1, len(x_list)+1):
+        plt.text(i,y_list[i-1]/2,y_list[i-1], ha="center")
+plt.barh(candyAttrPercent['Attributes'], candyAttrPercent['Values'])
+for index, value in enumerate(candyAttrPercent['Values']):
+    plt.text(value, index, str("{:.0%}".format(value)))
+plt.barh(candyAttrPercent['Attributes'], 1-candyAttrPercent['Values'], left=candyAttrPercent['Values'], color="lightgrey")
+plt.title('Rate of Attributes')
+plt.ylabel('Attributes')
+plt.xlabel('Percentage')
+ax.xaxis.set_major_formatter(mtick.PercentFormatter(xmax=1, decimals=None, symbol='%', is_latex=False))
+plt.show()
+```
+
+
+![png](README_files/README_7_0.png)
 
 
 
