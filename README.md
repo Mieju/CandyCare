@@ -16,13 +16,14 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
-
+import numpy as np
+import seaborn as sns
 ```
 
 
 ```python
-candyData = pd.read_csv('candy-data.csv')
-candyData
+candyDataAll = pd.read_csv('candy-data.csv')
+candyDataAll
 ```
 
 
@@ -250,7 +251,7 @@ candyData
 
 ```python
 #Show distribution of candy attributes in dataset
-candyAttributes = candyData.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+candyAttributes = candyDataAll.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 data = {'Attributes': candyAttributes.columns, 'Values': candyAttributes.sum()/len(candyAttributes)}  
 candyAttrPercent = pd.DataFrame(data).reset_index().drop(columns=['index']).sort_values(by=['Values'])
 
@@ -271,6 +272,18 @@ plt.show()
 
 
 ![png](README_files/README_7_0.png)
+
+
+
+```python
+#Attribute correlation analysis
+candyData = candyDataAll.drop(columns=['competitorname'])
+corr = candyData.corr(method='pearson')
+heatmap = sns.heatmap(corr, linewidth=0.5,cmap="YlGnBu").invert_yaxis()
+```
+
+
+![png](README_files/README_8_0.png)
 
 
 
