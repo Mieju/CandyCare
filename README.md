@@ -276,6 +276,31 @@ plt.show()
 
 
 ```python
+# Feature distribution
+sugar = candyDataAll['sugarpercent']
+price = candyDataAll['pricepercent']
+win = candyDataAll['winpercent']
+colors = ['tab:red', 'tab:green', 'tab:blue']
+data = [sugar, price, win]
+titles = ['Sugar percentage distribution','Price percentage distribution','Win percentage distribution']
+labels = ['Sugar percentage','Price percentage','Win percentage']
+
+fig, ax = plt.subplots(3,1)
+fig.set_figheight(15)
+
+for i in range(3):
+    ax[i].hist(data[i], bins=10, color=colors[i])
+    ax[i].title.set_text('Sugar percentage distribution')
+    ax[i].set_xlabel(labels[i])
+    ax[i].set_ylabel('Count')
+```
+
+
+![png](README_files/README_8_0.png)
+
+
+
+```python
 #Attribute correlation analysis
 candyData = candyDataAll.drop(columns=['competitorname'])
 corr = candyData.corr(method='pearson')
@@ -283,7 +308,7 @@ heatmap = sns.heatmap(corr, linewidth=0.5,cmap="YlGnBu").invert_yaxis()
 ```
 
 
-![png](README_files/README_8_0.png)
+![png](README_files/README_9_0.png)
 
 
 
