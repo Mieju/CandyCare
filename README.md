@@ -18,6 +18,12 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
 import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.datasets import make_blobs
+from sklearn.metrics import silhouette_score
+from kneed import KneeLocator
+from sklearn.decomposition import PCA
+# conda install -c conda-forge kneed
 ```
 
 
@@ -246,7 +252,8 @@ candyDataAll
 
 
 
-### Data exploration 
+## Data exploration 
+### Inspect distribution of candy attributes in dataset
 
 
 ```python
@@ -274,19 +281,21 @@ plt.show()
 ![png](README_files/README_7_0.png)
 
 
+### Inspect feature distribution
+
 
 ```python
 # Feature distribution
-sugar = candyDataAll['sugarpercent']
-price = candyDataAll['pricepercent']
+sugar = candyDataAll['sugarpercent']*100
+price = candyDataAll['pricepercent']*100
 win = candyDataAll['winpercent']
 colors = ['tab:red', 'tab:green', 'tab:blue']
 data = [sugar, price, win]
 titles = ['Sugar percentage distribution','Price percentage distribution','Win percentage distribution']
 labels = ['Sugar percentage','Price percentage','Win percentage']
 
-fig, ax = plt.subplots(3,1)
-fig.set_figheight(15)
+fig, ax = plt.subplots(1,3)
+fig.set_figwidth(15)
 
 for i in range(3):
     ax[i].hist(data[i], bins=10, color=colors[i])
@@ -296,22 +305,117 @@ for i in range(3):
 ```
 
 
-![png](README_files/README_8_0.png)
-
-
-
-```python
-#Attribute correlation analysis
-candyData = candyDataAll.drop(columns=['competitorname'])
-corr = candyData.corr(method='pearson')
-heatmap = sns.heatmap(corr, linewidth=0.5,cmap="YlGnBu").invert_yaxis()
-```
-
-
 ![png](README_files/README_9_0.png)
 
 
+## Cluster Analysis
+### Detect suitable cluster amount
+
 
 ```python
+from sklearn.cluster import KMeans
+from sklearn.datasets import make_blobs
+from sklearn.metrics import silhouette_score
+from kneed import KneeLocator
+# conda install -c conda-forge kneed
+
+kmeans = KMeans(n_clusters = 2)
+candyData = candyDataAll.drop(columns=['winpercent','competitorname'])
+
+kmeans_kwargs = {
+    "init": "random",
+    "n_init": 10,
+    "max_iter": 300,
+    "random_state": 42,
+}
+
+fig, ax = plt.subplots(1,2)
+fig.set_figwidth(15)
+
+# https://realpython.com/k-means-clustering-python/#:~:text=The%20k%2Dmeans%20clustering%20method,data%20objects%20in%20a%20dataset.&text=These%20traits%20make%20implementing%20k,novice%20programmers%20and%20data%20scientists.
+# to choose the appropriate number of clusters:
+# silhouette coefficient = measure of cluster cohesion and separation
+# values range between -1 and 1. Larger numbers indicate that samples are closer to their clusters than they are to other clusters
+
+silhouette_coefficients = []
+for k in range(2, 13):
+    kmeans = KMeans(n_clusters=k, **kmeans_kwargs)
+    kmeans.fit(candyData)
+    score = silhouette_score(candyData, kmeans.labels_)
+    silhouette_coefficients.append(score)
+
+plt.style.use("fivethirtyeight")
+ax[0].set_title("Silhouette coefficient")
+ax[0].plot(range(2, 13), silhouette_coefficients)
+ax[0].set_xticks(range(2, 13))
+ax[0].set_xlabel("Number of Clusters")
+ax[0].set_ylabel("Silhouette Coefficient")
+ax[0].vlines(silhouette_coefficients.index(max(silhouette_coefficients))+2, ymin=min(silhouette_coefficients), ymax=1.01*max(silhouette_coefficients), colors='green', linestyles='dashdot', linewidth=1.3)
+
+
+# to choose the appropriate number of clusters:
+# elbow = measure of cluster cohesion and separation
+
+sse = []
+for k in range(1, 13):
+    kmeans = KMeans(n_clusters=k, **kmeans_kwargs)
+    kmeans.fit(candyData)
+    sse.append(kmeans.inertia_)
+ax[1].set_title("Elbow method")
+ax[1].plot(range(1, 13), sse)
+ax[1].set_xticks(range(1, 13))
+ax[1].set_xlabel("Number of Clusters")
+ax[1].set_ylabel("SSE")
+kl = KneeLocator(
+    range(1, 13), sse, curve="convex", direction="decreasing")
+ax[1].vlines(kl.elbow, ymin=min(sse), ymax=max(sse)*1.01, colors='green', linestyles='dashdot', linewidth=1.3)
+
+plt.show()
+print("The optimal cluster amount based on silhouette coefficient method is ", silhouette_coefficients.index(max(silhouette_coefficients))+2)
+print("The optimal cluster amount based on elbow method is ", kl.elbow)
+
 
 ```
+
+    C:\Users\annma\anaconda3\lib\site-packages\sklearn\cluster\_kmeans.py:881: UserWarning: KMeans is known to have a memory leak on Windows with MKL, when there are less chunks than available threads. You can avoid it by setting the environment variable OMP_NUM_THREADS=1.
+      warnings.warn(
+
+
+
+![png](README_files/README_11_1.png)
+
+
+    The optimal cluster amount based on silhouette coefficient method is  11
+    The optimal cluster amount based on elbow method is  4
+
+
+
+```python
+pca = PCA(2)
+cD = pca.fit_transform(candyData)
+
+fig, ax = plt.subplots(1,2)
+fig.set_figwidth(15)
+
+kmeansE = KMeans(n_clusters=kl.elbow)
+label = kmeansE.fit_predict(cD)
+u_labels = np.unique(label)
+for i in u_labels:
+    ax[0].scatter(cD[label == i, 0], cD[label == i, 1], label = i)
+ax[0].set_title("KMeans with " + str(kl.elbow) + " clusters")
+#ax[0].legend()
+
+
+kmeansS = KMeans(n_clusters=silhouette_coefficients.index(max(silhouette_coefficients))+2)
+label = kmeansS.fit_predict(cD)
+u_labels = np.unique(label)
+for i in u_labels:
+    ax[1].scatter(cD[label == i, 0], cD[label == i, 1], label = i)
+ax[1].set_title("KMeans with " + str(silhouette_coefficients.index(max(silhouette_coefficients))+2) + " clusters")
+#ax[1].legend()
+plt.show()
+```
+
+
+![png](README_files/README_12_0.png)
+
