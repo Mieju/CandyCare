@@ -6,7 +6,7 @@ _by Julian Mierisch and Anna Martynova_
 ### Goals
 1. Make Model which predicts which win percentage a given new candy has
 2. Predict which combination has highest win propability
-3. Cluster data?
+3. Cluster data
 
 ### Import packages and data
 
@@ -309,6 +309,8 @@ for i in range(3):
 
 
 ## Cluster Analysis
+To analyze which features are most beneficial for high win percentage, we have to cluster the datapoints and analyze the features, that influence the average win percentage (further: awp) of each cluster
+
 ### Detect suitable cluster amount
 
 
@@ -373,6 +375,9 @@ ax[1].vlines(kl.elbow, ymin=min(sse), ymax=max(sse)*1.01, colors='green', linest
 plt.show()
 print("The optimal cluster amount based on silhouette coefficient method is ", silhouette_coefficients.index(max(silhouette_coefficients))+2)
 print("The optimal cluster amount based on elbow method is ", kl.elbow)
+print()
+print("Following, we will analyze both KMeans with ", kl.elbow, " and with ", silhouette_coefficients.index(max(silhouette_coefficients))+2, 
+     " clusters to decide which cluster has highes average winpercent with acceptable cluster size (ca. >10)")
 
 
 ```
@@ -387,35 +392,104 @@ print("The optimal cluster amount based on elbow method is ", kl.elbow)
 
     The optimal cluster amount based on silhouette coefficient method is  11
     The optimal cluster amount based on elbow method is  4
+    
+    Following, we will analyze both KMeans with  4  and with  11  clusters to decide which cluster has highes average winpercent with acceptable cluster size (ca. >10)
 
+
+### Analyze clusters with KMeans
+
+Since winpercentage is our target data, we exclude it from data which we cluster. Afterwards, we map the average winpercentage on resulted cluster and select the cluster with highest average winpercentage for further analysis of its features
 
 
 ```python
+def autolabel(rects,axes, bar_plot):
+    for idx,rect in enumerate(bar_plot):
+        height = rect.get_height()
+        axes.text(rect.get_x() + rect.get_width()/2., 1,
+                "awp = "+ str(round(winRates[idx],1)),
+                ha='center', va='bottom', rotation=90)
+
 pca = PCA(2)
 cD = pca.fit_transform(candyData)
 
 fig, ax = plt.subplots(1,2)
+fig2,ax2 = plt.subplots(1,2)
 fig.set_figwidth(15)
+fig2.set_figwidth(15)
 
 kmeansE = KMeans(n_clusters=kl.elbow)
 label = kmeansE.fit_predict(cD)
 u_labels = np.unique(label)
+clusterSizes = []
+winRates = []
+
+# plot scatters for 4 clusters
 for i in u_labels:
     ax[0].scatter(cD[label == i, 0], cD[label == i, 1], label = i)
+    clusterSizes.append(cD[label == i,0].size)
+    winPercentages = []
+    for k in cD[label==i]:
+        winPercentages.append(candyDataAll['winpercent'][np.where(cD==k)[0][0]])
+    winRates.append(sum(winPercentages)/len(winPercentages))
 ax[0].set_title("KMeans with " + str(kl.elbow) + " clusters")
-#ax[0].legend()
 
+# plot barchart
+colors = plt.cm.BuPu(np.linspace(0, 0.5, len(clusterSizes)))
+bar_plt = ax2[0].bar(range(0,len(clusterSizes)),clusterSizes, color=colors, tick_label=range(0,len(clusterSizes)))
+ax2[0].set_xlabel('Clusters')
+ax2[0].set_ylabel('Size')
+ax2[0].set_title('Cluster sizes of ' + str(len(clusterSizes)) + ' clusters')
+maxClusterEL = clusterSizes.index(max(clusterSizes))
+autolabel(bar_plt,ax2[0],bar_plt)
 
 kmeansS = KMeans(n_clusters=silhouette_coefficients.index(max(silhouette_coefficients))+2)
 label = kmeansS.fit_predict(cD)
 u_labels = np.unique(label)
+clusterSizes = []
+winRates = []
+
+# plot scatters for 11 clusters
 for i in u_labels:
     ax[1].scatter(cD[label == i, 0], cD[label == i, 1], label = i)
-ax[1].set_title("KMeans with " + str(silhouette_coefficients.index(max(silhouette_coefficients))+2) + " clusters")
-#ax[1].legend()
+    clusterSizes.append(cD[label == i,0].size)
+    winPercentages = []
+    for k in cD[label==i]:
+        winPercentages.append(candyDataAll['winpercent'][np.where(cD==k)[0][0]])
+    winRates.append(sum(winPercentages)/len(winPercentages))
+ax[1].set_title("KMeans with " + str(silhouette_coefficients.index(max(silhouette_coefficients))+2) + " clusters"),
+
+# plot barchart
+colors = plt.cm.BuPu(np.linspace(0, 0.5, len(clusterSizes)))
+#plt.set_facecolor('white')
+bar_plt2 = ax2[1].bar(range(0,len(clusterSizes)),clusterSizes, color=colors, tick_label=range(0,len(clusterSizes)))
+ax2[1].set_xlabel('Clusters')
+ax2[1].set_ylabel('Size')
+ax2[1].set_title('Cluster sizes of ' + str(len(clusterSizes)) + ' clusters')
+maxClusterSIL = clusterSizes.index(max(clusterSizes))
+autolabel(bar_plt2,ax2[1],bar_plt2)
+
 plt.show()
+
+print('The largest of ', kl.elbow, ' clusters is: Cluster ', maxClusterEL)
+print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficients))+2, ' clusters is: Cluster ', maxClusterSIL)
+
 ```
 
 
-![png](README_files/README_12_0.png)
+![png](README_files/README_14_0.png)
 
+
+
+![png](README_files/README_14_1.png)
+
+
+    The largest of  4  clusters is: Cluster  3
+    The largest of  11  clusters is: Cluster  1
+
+
+As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
+
+
+```python
+
+```
