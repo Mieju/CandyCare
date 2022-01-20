@@ -27,6 +27,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
 # conda install -c conda-forge kneed
 ```
 
@@ -502,8 +507,8 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 ![png](README_files/README_15_1.png)
 
 
-    The largest of  4  clusters is: Cluster  3
-    The largest of  11  clusters is: Cluster  0
+    The largest of  4  clusters is: Cluster  0
+    The largest of  11  clusters is: Cluster  1
 
 
 As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
@@ -574,86 +579,51 @@ y_validation_p = training_set['pricepercent']
 X_train_w = training_set.drop(columns = ['competitorname', 'winpercent'])
 y_train_w = training_set['winpercent']
 
-X_test_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+X_test_w = training_set.drop(columns = ['competitorname', 'winpercent'])
 y_test_w = training_set['winpercent']
 
-X_validation_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+X_validation_w = training_set.drop(columns = ['competitorname', 'winpercent'])
 y_validation_w = training_set['winpercent']
 ```
 
 ## Random forest classifier
-### Predicting sugarpercent
+### Create sugarpercent-predictor
 
 
 ```python
-clf=RandomForestClassifier(n_estimators=100)
-clf.fit(X_train_s, list(map(int,y_train_s*1000)))
-y_pred_s = clf.predict(X_test_s)/1000
-print("Accuracy: ", accuracy_score(list(map(int,y_test_s*1000)),list(map(int,y_pred_s*1000))))
-confusion_matrix(list(map(int,y_test_s*1000)),list(map(int,y_pred_s*1000)))
+clf_s=RandomForestClassifier(n_estimators=100)
+clf_s.fit(X_train_s, list(map(int,y_train_s*1000)))
+y_pred_s = clf_s.predict(X_test_s)/1000
+print("MAE = ", mean_absolute_error(y_test_s,y_pred_s))
 ```
 
-    Accuracy:  0.5423728813559322
+    MAE =  0.14496609684745762
 
 
+### Create pricepercent-predictor
 
 
+```python
+clf_p=RandomForestClassifier(n_estimators=100)
+clf_p.fit(X_train_p, list(map(int,y_train_p*1000)))
+y_pred_p = clf_p.predict(X_test_p)/1000
+print("MAE = ", mean_absolute_error(y_test_p,y_pred_p))
+```
 
-    array([[2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            0, 0, 1, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 1, 1, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0,
-            0, 0, 1, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0,
-            0, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-            0, 2, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 1, 2, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 2]], dtype=int64)
+    MAE =  0.14052542281355934
 
+
+### Create winpercent-predictor
+
+
+```python
+clf_w=RandomForestClassifier(n_estimators=100)
+clf_w.fit(X_train_w, list(map(int,y_train_w*1000)))
+y_pred_w = clf_w.predict(X_test_w)/1000
+print("MAE = ", mean_absolute_error(y_test_w,y_pred_w))
+```
+
+    MAE =  0.9935017118644066
 
 
 ### Prediction price
@@ -662,145 +632,8 @@ confusion_matrix(list(map(int,y_test_s*1000)),list(map(int,y_pred_s*1000)))
 ```python
 clf=RandomForestClassifier(n_estimators=100)
 clf.fit(X_train_s, list(map(int,y_train_s*1000)))
-y_pred_s = clf.predict(X_test_s)/1000
+y_pred_s = clf.predict(X_test_s)/1000   
 ```
-
-
-
-
-    [220,
-     731,
-     940,
-     964,
-     465,
-     301,
-     603,
-     266,
-     871,
-     906,
-     93,
-     197,
-     731,
-     465,
-     964,
-     312,
-     465,
-     731,
-     603,
-     418,
-     46,
-     847,
-     312,
-     569,
-     731,
-     312,
-     266,
-     592,
-     603,
-     312,
-     11,
-     173,
-     603,
-     603,
-     465,
-     465,
-     731,
-     603,
-     266,
-     906,
-     197,
-     11,
-     603,
-     731,
-     871,
-     940,
-     127,
-     186,
-     871,
-     731,
-     68,
-     405,
-     720,
-     603,
-     93,
-     546,
-     68,
-     430,
-     906]
-
-
-
-
-```python
-y_test_s
-
-```
-
-
-
-
-    45    0.220
-    37    0.732
-    61    0.941
-    70    0.965
-    21    0.465
-    35    0.302
-    42    0.604
-    62    0.267
-    84    0.872
-    17    0.906
-    81    0.093
-    44    0.197
-    0     0.732
-    18    0.465
-    38    0.965
-    39    0.313
-    46    0.465
-    57    0.732
-    74    0.604
-    71    0.418
-    30    0.046
-    41    0.848
-    82    0.313
-    69    0.569
-    55    0.732
-    75    0.313
-    63    0.267
-    47    0.593
-    49    0.604
-    7     0.313
-    3     0.011
-    76    0.174
-    65    0.604
-    36    0.604
-    19    0.465
-    77    0.465
-    13    0.732
-    1     0.604
-    31    0.267
-    4     0.906
-    27    0.197
-    2     0.011
-    9     0.604
-    16    0.732
-    58    0.872
-    60    0.941
-    15    0.127
-    83    0.186
-    34    0.872
-    14    0.732
-    66    0.069
-    53    0.406
-    52    0.720
-    10    0.604
-    48    0.093
-    79    0.546
-    67    0.069
-    24    0.430
-    8     0.906
-    Name: sugarpercent, dtype: float64
-
-
 
 
 ```python
