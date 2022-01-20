@@ -402,8 +402,12 @@ print("Following, we will analyze both KMeans with ", kl.elbow, " and with ", si
 
 ```
 
+    C:\Users\annma\anaconda3\lib\site-packages\sklearn\cluster\_kmeans.py:881: UserWarning: KMeans is known to have a memory leak on Windows with MKL, when there are less chunks than available threads. You can avoid it by setting the environment variable OMP_NUM_THREADS=1.
+      warnings.warn(
 
-![png](README_files/README_12_0.png)
+
+
+![png](README_files/README_12_1.png)
 
 
     The optimal cluster amount based on silhouette coefficient method is  11
@@ -451,7 +455,7 @@ for i in u_labels:
 ax[1].set_title("KMeans with " + str(silhouette_coefficients.index(max(silhouette_coefficients))+2) + " clusters"),
 
 # plot barchart
-colors = plt.cm.BuPu(np.linspace(0, 0.5, len(clusterSizes)))
+colors = plt.cm.BuPu(np.linspace(0.2, 0.5, len(clusterSizes)))
 #plt.set_facecolor('white')
 bar_plt2 = ax2[1].bar(range(0,len(clusterSizes)),clusterSizes, color=colors, tick_label=range(0,len(clusterSizes)))
 ax2[1].set_xlabel('Clusters')
@@ -503,7 +507,7 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 
 
     The largest of  4  clusters is: Cluster  1
-    The largest of  11  clusters is: Cluster  1
+    The largest of  11  clusters is: Cluster  5
 
 
 As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
@@ -524,7 +528,7 @@ for factor in clusterCandies.columns:
 
 
 ```python
-colors = plt.cm.BuPu(np.linspace(0, 0.5, len(vals)))
+colors = plt.cm.BuPu(np.linspace(0.2, 0.5, len(vals)))
 bar_plt = plt.bar(range(0,len(vals)), vals, color=colors, tick_label=clusterCandies.columns)
 plt.xticks(rotation = 'vertical')
 plt.xlabel('Features')
@@ -549,8 +553,7 @@ for idx,bar_plt in enumerate(bar_plt):
 ```python
 candyDataProcessed = candyDataAll
 candyDataProcessed['winpercent'] = candyDataProcessed['winpercent']/100
-training_set, test_set = train_test_split(candyDataProcessed, test_size=0.3, random_state = 100)
-validation_set, test_set = train_test_split(test_set, test_size=0.5, random_state = 100)
+training_set, test_set = train_test_split(candyDataProcessed, test_size=0.2, random_state = 100)
 
 #sugar
 X_train_s = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
@@ -559,18 +562,12 @@ y_train_s = training_set['sugarpercent']
 X_test_s = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_test_s = training_set['sugarpercent']
 
-X_validation_s = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
-y_validation_s = training_set['sugarpercent']
-
 #price
 X_train_p = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_train_p = training_set['pricepercent']
 
 X_test_p = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_test_p = training_set['pricepercent']
-
-X_validation_p = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
-y_validation_p = training_set['pricepercent']
 
 #win
 X_train_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
@@ -579,8 +576,6 @@ y_train_w = training_set['winpercent']
 X_test_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_test_w = training_set['winpercent']
 
-X_validation_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
-y_validation_w = training_set['winpercent']
 ```
 
 ## Random forest classifier
@@ -595,8 +590,8 @@ print("MAE =", mean_absolute_error(y_test_s,y_pred_s))
 print("Score (Acc) =", clf_s.score(X_test_s,y_test_s))
 ```
 
-    MAE =  0.16962848787379214
-    Score (Acc) =  0.3819626013913967
+    MAE = 0.19496121423048857
+    Score (Acc) = 0.28947843541575746
 
 
 ### Create pricepercent-predictor
@@ -610,8 +605,8 @@ print("MAE =", mean_absolute_error(y_test_p,y_pred_p))
 print("Score (Acc) =", clf_p.score(X_test_p,y_test_p))
 ```
 
-    MAE = 0.14923434423975768
-    Score (Acc) = 0.4233939012749507
+    MAE = 0.15298698476539369
+    Score (Acc) = 0.4391069150662821
 
 
 ### Create winpercent-predictor
@@ -625,8 +620,8 @@ print("MAE =", mean_absolute_error(y_test_w,y_pred_w))
 print("Score (Acc) =", clf_w.score(X_test_w,y_test_w))
 ```
 
-    MAE = 0.0005135200033241511
-    Score (Acc) = 0.7406549644650849
+    MAE = 0.0564882607187665
+    Score (Acc) = 0.7107847959923121
 
 
 ### Create Methods
@@ -644,14 +639,25 @@ def predWin_RF(dataline):
     return clf_w.predict(dataline)
 ```
 
-### Prediction price
+### Feature importance
 
 
 ```python
-clf=RandomForestClassifier(n_estimators=100)
-clf.fit(X_train_s, list(map(int,y_train_s*1000)))
-y_pred_s = clf.predict(X_test_s)/1000   
+colors = plt.cm.BuPu(np.linspace(0.2, 0.5, len(X_train_w.columns)))
+plt.barh(X_train_w.columns, clf_w.feature_importances_,  color=colors)
+plt.title("Feature importance")
 ```
+
+
+
+
+    Text(0.5, 1.0, 'Feature importance')
+
+
+
+
+![png](README_files/README_30_1.png)
+
 
 
 ```python
