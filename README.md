@@ -31,6 +31,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsRegressor
 # conda install -c conda-forge kneed
 ```
 
@@ -402,12 +403,8 @@ print("Following, we will analyze both KMeans with ", kl.elbow, " and with ", si
 
 ```
 
-    C:\Users\annma\anaconda3\lib\site-packages\sklearn\cluster\_kmeans.py:881: UserWarning: KMeans is known to have a memory leak on Windows with MKL, when there are less chunks than available threads. You can avoid it by setting the environment variable OMP_NUM_THREADS=1.
-      warnings.warn(
 
-
-
-![png](README_files/README_12_1.png)
+![png](README_files/README_12_0.png)
 
 
     The optimal cluster amount based on silhouette coefficient method is  11
@@ -506,8 +503,8 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 ![png](README_files/README_15_1.png)
 
 
-    The largest of  4  clusters is: Cluster  3
-    The largest of  11  clusters is: Cluster  0
+    The largest of  4  clusters is: Cluster  2
+    The largest of  11  clusters is: Cluster  3
 
 
 As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
@@ -590,8 +587,8 @@ print("MAE =", mean_absolute_error(y_test_s,y_pred_s))
 print("MSE =", mean_squared_error(y_test_s,y_pred_s))
 ```
 
-    MAE = 0.21432218107351683
-    MSE = 0.06712060846907889
+    MAE = 0.21882942913833026
+    MSE = 0.06873529287587565
 
 
 ### Create pricepercent-predictor
@@ -605,8 +602,8 @@ print("MAE =", mean_absolute_error(y_test_p,y_pred_p))
 print("MSE =", mean_squared_error(y_test_p,y_pred_p))
 ```
 
-    MAE = 0.19046294187270557
-    MSE = 0.047888440852615
+    MAE = 0.19310535416801825
+    MSE = 0.04948307278493425
 
 
 ### Create winpercent-predictor
@@ -620,8 +617,60 @@ print("MAE =", mean_absolute_error(y_test_w,y_pred_w))
 print("MSE =", mean_squared_error(y_test_w,y_pred_w))
 ```
 
-    MAE = 0.09865609931313746
-    MSE = 0.016206188738581505
+    MAE = 0.09533035462284334
+    MSE = 0.01539841273695784
+
+
+## K Neighbors regressor
+### Create sugarpercent-predictor
+
+
+```python
+knn_regressor_s = KNeighborsRegressor(n_neighbors = 5, 
+                                    p = 2, 
+                                    weights = 'uniform')
+knn_regressor_s.fit(X_train_s, y_train_s)
+y_pred_s_knn = knn_regressor_s.predict(X_test_s)
+print("MAE =", mean_absolute_error(y_test_s,y_pred_s_knn))
+print("MSE =", mean_squared_error(y_test_s,y_pred_s_knn))
+```
+
+    MAE = 0.1805411732
+    MSE = 0.04525526821221666
+
+
+### Create pricepercent-predictor
+
+
+```python
+knn_regressor_p = KNeighborsRegressor(n_neighbors = 5, 
+                                    p = 2, 
+                                    weights = 'uniform')
+knn_regressor_p.fit(X_train_p, y_train_p)
+y_pred_p_knn = knn_regressor_p.predict(X_test_p)
+print("MAE =", mean_absolute_error(y_test_p,y_pred_p_knn))
+print("MSE =", mean_squared_error(y_test_p,y_pred_p_knn))
+```
+
+    MAE = 0.20861176423529415
+    MSE = 0.05977085202658836
+
+
+### Create winpercent-predictor
+
+
+```python
+knn_regressor_w = KNeighborsRegressor(n_neighbors = 5, 
+                                    p = 2, 
+                                    weights = 'uniform')
+knn_regressor_w.fit(X_train_w, y_train_w)
+y_pred_w_knn = knn_regressor_w.predict(X_test_w)
+print("MAE =", mean_absolute_error(y_test_w,y_pred_w_knn))
+print("MSE =", mean_squared_error(y_test_w,y_pred_w_knn))
+```
+
+    MAE = 0.09626410952941178
+    MSE = 0.013005556901130064
 
 
 ### Create Methods
@@ -637,6 +686,15 @@ def predPrice_RF(dataline):
 
 def predWin_RF(dataline):
     return clf_w.predict(dataline)
+
+def predSugar_KNN(dataline):
+    return knn_regressor_s.predict(dataline)
+
+def predPrice_KNN(dataline):
+    return knn_regressor_p.predict(dataline)
+
+def predWin_KNN(dataline):
+    return knn_regressor_w.predict(dataline)
 ```
 
 ### Feature importance
@@ -656,10 +714,155 @@ plt.title("Feature importance")
 
 
 
-![png](README_files/README_30_1.png)
+![png](README_files/README_36_1.png)
+
+
+### Predict New Candy
+
+
+```python
+newCandy = {'competitorname': 'test', 'chocolate':1, 'fruity':0, 'caramel':0, 'peanutyalmondy':1, 'nougat':0, 'crispedricewafer':0, 'hard':0, 'bar':1, 'pluribus':0, 'sugarpercent':0.3, 'pricepercent':0.5, 'winpercent':0.4}
+dataline = pd.DataFrame(columns= candyDataAll.columns)
+dataline = dataline.append(newCandy, ignore_index=True)
+dataline = dataline.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+
+pred_sugar = predSugar_RF(dataline)
+pred_price = predPrice_RF(dataline)
+dataline['sugarpercent'] = pred_sugar[0]
+dataline['pricepercent'] = pred_price[0]
+
+pred_win = predWin_RF(dataline)
+dataline['winpercent'] = pred_win[0]
+dataline
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>chocolate</th>
+      <th>fruity</th>
+      <th>caramel</th>
+      <th>peanutyalmondy</th>
+      <th>nougat</th>
+      <th>crispedricewafer</th>
+      <th>hard</th>
+      <th>bar</th>
+      <th>pluribus</th>
+      <th>sugarpercent</th>
+      <th>pricepercent</th>
+      <th>winpercent</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0.464404</td>
+      <td>0.821808</td>
+      <td>0.654776</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 
 
 
 ```python
-            
+newCandy = {'competitorname': 'test', 'chocolate':1, 'fruity':0, 'caramel':0, 'peanutyalmondy':1, 'nougat':0, 'crispedricewafer':0, 'hard':0, 'bar':1, 'pluribus':0, 'sugarpercent':0.3, 'pricepercent':0.5, 'winpercent':0.4}
+dataline = pd.DataFrame(columns= candyDataAll.columns)
+dataline = dataline.append(newCandy, ignore_index=True)
+dataline = dataline.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+
+pred_sugar = predSugar_KNN(dataline)
+pred_price = predPrice_KNN(dataline)
+dataline['sugarpercent'] = pred_sugar[0]
+dataline['pricepercent'] = pred_price[0]
+
+pred_win = predWin_KNN(dataline)
+dataline['winpercent'] = pred_win[0]
+dataline
 ```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>chocolate</th>
+      <th>fruity</th>
+      <th>caramel</th>
+      <th>peanutyalmondy</th>
+      <th>nougat</th>
+      <th>crispedricewafer</th>
+      <th>hard</th>
+      <th>bar</th>
+      <th>pluribus</th>
+      <th>sugarpercent</th>
+      <th>pricepercent</th>
+      <th>winpercent</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0.3458</td>
+      <td>0.6298</td>
+      <td>0.558472</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
