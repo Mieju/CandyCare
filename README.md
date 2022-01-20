@@ -32,6 +32,7 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
+from operator import itemgetter
 # conda install -c conda-forge kneed
 ```
 
@@ -319,14 +320,26 @@ fig, ax = plt.subplots(1,3)
 fig.set_figwidth(15)
 
 for i in range(3):
-    ax[i].hist(data[i], bins=10, color=colors[i])
+    ax[i].hist(data[i], bins=10, color=colors[i], alpha = 0.5)
     ax[i].title.set_text(titles[i])
     ax[i].set_xlabel(labels[i])
     ax[i].set_ylabel('Amount')
 ```
 
 
-![png](README_files/README_10_0.png)
+    ---------------------------------------------------------------------------
+
+    NameError                                 Traceback (most recent call last)
+
+    <ipython-input-1-138d0e22d484> in <module>
+          1 # Feature distribution
+    ----> 2 sugar = candyDataAll['sugarpercent']*100
+          3 price = candyDataAll['pricepercent']*100
+          4 win = candyDataAll['winpercent']
+          5 colors = ['tab:red', 'tab:green', 'tab:blue']
+
+
+    NameError: name 'candyDataAll' is not defined
 
 
 ## Cluster Analysis
@@ -701,8 +714,15 @@ def predWin_KNN(dataline):
 
 
 ```python
+f_imp = []
+for i in range(0,len(clf_w.feature_importances_)):
+    f_imp.append([X_train_w.columns[i], clf_w.feature_importances_[i]])
+f_imp = sorted(f_imp, key=itemgetter(1), reverse=False)
+columns = [f_i[0] for f_i in f_imp]
+values = [f_i[1] for f_i in f_imp]
+
 colors = plt.cm.BuPu(np.linspace(0.2, 0.5, len(X_train_w.columns)))
-plt.barh(X_train_w.columns, clf_w.feature_importances_, color=colors)
+plt.barh(columns, values, color=colors)
 plt.title("Feature importance")
 ```
 
@@ -716,6 +736,11 @@ plt.title("Feature importance")
 
 ![png](README_files/README_36_1.png)
 
+
+
+```python
+
+```
 
 ### Predict New Candy
 
