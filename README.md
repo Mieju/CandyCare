@@ -24,14 +24,13 @@ from sklearn.metrics import silhouette_score
 from kneed import KneeLocator
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
 # conda install -c conda-forge kneed
 ```
 
@@ -403,12 +402,8 @@ print("Following, we will analyze both KMeans with ", kl.elbow, " and with ", si
 
 ```
 
-    C:\Users\annma\anaconda3\lib\site-packages\sklearn\cluster\_kmeans.py:881: UserWarning: KMeans is known to have a memory leak on Windows with MKL, when there are less chunks than available threads. You can avoid it by setting the environment variable OMP_NUM_THREADS=1.
-      warnings.warn(
 
-
-
-![png](README_files/README_12_1.png)
+![png](README_files/README_12_0.png)
 
 
     The optimal cluster amount based on silhouette coefficient method is  11
@@ -507,7 +502,7 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 ![png](README_files/README_15_1.png)
 
 
-    The largest of  4  clusters is: Cluster  0
+    The largest of  4  clusters is: Cluster  1
     The largest of  11  clusters is: Cluster  1
 
 
@@ -552,7 +547,9 @@ for idx,bar_plt in enumerate(bar_plt):
 
 
 ```python
-training_set, test_set = train_test_split(candyDataAll, test_size=0.3, random_state = 100)
+candyDataProcessed = candyDataAll
+candyDataProcessed['winpercent'] = candyDataProcessed['winpercent']/100
+training_set, test_set = train_test_split(candyDataProcessed, test_size=0.3, random_state = 100)
 validation_set, test_set = train_test_split(test_set, test_size=0.5, random_state = 100)
 
 #sugar
@@ -576,13 +573,13 @@ X_validation_p = training_set.drop(columns = ['competitorname', 'sugarpercent', 
 y_validation_p = training_set['pricepercent']
 
 #win
-X_train_w = training_set.drop(columns = ['competitorname', 'winpercent'])
+X_train_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_train_w = training_set['winpercent']
 
-X_test_w = training_set.drop(columns = ['competitorname', 'winpercent'])
+X_test_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_test_w = training_set['winpercent']
 
-X_validation_w = training_set.drop(columns = ['competitorname', 'winpercent'])
+X_validation_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_validation_w = training_set['winpercent']
 ```
 
@@ -591,40 +588,61 @@ y_validation_w = training_set['winpercent']
 
 
 ```python
-clf_s=RandomForestClassifier(n_estimators=100)
-clf_s.fit(X_train_s, list(map(int,y_train_s*1000)))
-y_pred_s = clf_s.predict(X_test_s)/1000
-print("MAE = ", mean_absolute_error(y_test_s,y_pred_s))
+clf_s=RandomForestRegressor(n_estimators=100)
+clf_s.fit(X_train_s, y_train_s)
+y_pred_s = clf_s.predict(X_test_s)
+print("MAE =", mean_absolute_error(y_test_s,y_pred_s))
+print("Score (Acc) =", clf_s.score(X_test_s,y_test_s))
 ```
 
-    MAE =  0.14496609684745762
+    MAE =  0.16962848787379214
+    Score (Acc) =  0.3819626013913967
 
 
 ### Create pricepercent-predictor
 
 
 ```python
-clf_p=RandomForestClassifier(n_estimators=100)
-clf_p.fit(X_train_p, list(map(int,y_train_p*1000)))
-y_pred_p = clf_p.predict(X_test_p)/1000
-print("MAE = ", mean_absolute_error(y_test_p,y_pred_p))
+clf_p=RandomForestRegressor(n_estimators=100)
+clf_p.fit(X_train_p, y_train_p)
+y_pred_p = clf_p.predict(X_test_p)
+print("MAE =", mean_absolute_error(y_test_p,y_pred_p))
+print("Score (Acc) =", clf_p.score(X_test_p,y_test_p))
 ```
 
-    MAE =  0.14052542281355934
+    MAE = 0.14923434423975768
+    Score (Acc) = 0.4233939012749507
 
 
 ### Create winpercent-predictor
 
 
 ```python
-clf_w=RandomForestClassifier(n_estimators=100)
-clf_w.fit(X_train_w, list(map(int,y_train_w*1000)))
-y_pred_w = clf_w.predict(X_test_w)/1000
-print("MAE = ", mean_absolute_error(y_test_w,y_pred_w))
+clf_w=RandomForestRegressor(n_estimators=100)
+clf_w.fit(X_train_w, y_train_w)
+y_pred_w = clf_w.predict(X_test_w)
+print("MAE =", mean_absolute_error(y_test_w,y_pred_w))
+print("Score (Acc) =", clf_w.score(X_test_w,y_test_w))
 ```
 
-    MAE =  0.9935017118644066
+    MAE = 0.0005135200033241511
+    Score (Acc) = 0.7406549644650849
 
+
+### Create Methods
+
+
+```python
+# dataline should have the format of a Dataframe!
+def predSugar_RF(dataline):
+    return clf_s.predict(dataline)
+
+def predPrice_RF(dataline):
+    return clf_p.predict(dataline)
+
+def predWin_RF(dataline):
+    return clf_w.predict(dataline)
+```
 
 ### Prediction price
 
