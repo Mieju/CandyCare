@@ -24,6 +24,9 @@ from sklearn.metrics import silhouette_score
 from kneed import KneeLocator
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
 # conda install -c conda-forge kneed
 ```
 
@@ -551,10 +554,10 @@ validation_set, test_set = train_test_split(test_set, test_size=0.5, random_stat
 X_train_s = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_train_s = training_set['sugarpercent']
 
-X_test_s = training_set.drop(winpercent['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+X_test_s = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_test_s = training_set['sugarpercent']
 
-X_validation_s = training_set.drop(winpercent['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+X_validation_s = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_validation_s = training_set['sugarpercent']
 
 #price
@@ -578,31 +581,224 @@ X_validation_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 
 y_validation_w = training_set['winpercent']
 ```
 
-
-    ---------------------------------------------------------------------------
-
-    NameError                                 Traceback (most recent call last)
-
-    <ipython-input-24-a5e3aba8a02b> in <module>
-          6 y_train_s = training_set['sugarpercent']
-          7 
-    ----> 8 X_test_s = training_set.drop(winpercent['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
-          9 y_test_s = training_set['sugarpercent']
-         10 
+## Random forest classifier
+### Predicting sugarpercent
 
 
-    NameError: name 'winpercent' is not defined
+```python
+clf=RandomForestClassifier(n_estimators=100)
+clf.fit(X_train_s, list(map(int,y_train_s*1000)))
+y_pred_s = clf.predict(X_test_s)/1000
+print("Accuracy: ", accuracy_score(list(map(int,y_test_s*1000)),list(map(int,y_pred_s*1000))))
+confusion_matrix(list(map(int,y_test_s*1000)),list(map(int,y_pred_s*1000)))
+```
+
+    Accuracy:  0.5423728813559322
+
+
+
+
+
+    array([[2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0,
+            0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0,
+            0, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+            0, 2, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 2, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 2]], dtype=int64)
+
+
+
+### Prediction price
+
+
+```python
+clf=RandomForestClassifier(n_estimators=100)
+clf.fit(X_train_s, list(map(int,y_train_s*1000)))
+y_pred_s = clf.predict(X_test_s)/1000
+```
+
+
+
+
+    [220,
+     731,
+     940,
+     964,
+     465,
+     301,
+     603,
+     266,
+     871,
+     906,
+     93,
+     197,
+     731,
+     465,
+     964,
+     312,
+     465,
+     731,
+     603,
+     418,
+     46,
+     847,
+     312,
+     569,
+     731,
+     312,
+     266,
+     592,
+     603,
+     312,
+     11,
+     173,
+     603,
+     603,
+     465,
+     465,
+     731,
+     603,
+     266,
+     906,
+     197,
+     11,
+     603,
+     731,
+     871,
+     940,
+     127,
+     186,
+     871,
+     731,
+     68,
+     405,
+     720,
+     603,
+     93,
+     546,
+     68,
+     430,
+     906]
+
 
 
 
 ```python
+y_test_s
 
 ```
 
 
 
 
-    59
+    45    0.220
+    37    0.732
+    61    0.941
+    70    0.965
+    21    0.465
+    35    0.302
+    42    0.604
+    62    0.267
+    84    0.872
+    17    0.906
+    81    0.093
+    44    0.197
+    0     0.732
+    18    0.465
+    38    0.965
+    39    0.313
+    46    0.465
+    57    0.732
+    74    0.604
+    71    0.418
+    30    0.046
+    41    0.848
+    82    0.313
+    69    0.569
+    55    0.732
+    75    0.313
+    63    0.267
+    47    0.593
+    49    0.604
+    7     0.313
+    3     0.011
+    76    0.174
+    65    0.604
+    36    0.604
+    19    0.465
+    77    0.465
+    13    0.732
+    1     0.604
+    31    0.267
+    4     0.906
+    27    0.197
+    2     0.011
+    9     0.604
+    16    0.732
+    58    0.872
+    60    0.941
+    15    0.127
+    83    0.186
+    34    0.872
+    14    0.732
+    66    0.069
+    53    0.406
+    52    0.720
+    10    0.604
+    48    0.093
+    79    0.546
+    67    0.069
+    24    0.430
+    8     0.906
+    Name: sugarpercent, dtype: float64
 
 
 
