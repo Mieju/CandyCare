@@ -23,6 +23,7 @@ from sklearn.datasets import make_blobs
 from sklearn.metrics import silhouette_score
 from kneed import KneeLocator
 from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
 # conda install -c conda-forge kneed
 ```
 
@@ -311,9 +312,9 @@ fig.set_figwidth(15)
 
 for i in range(3):
     ax[i].hist(data[i], bins=10, color=colors[i])
-    ax[i].title.set_text('Sugar percentage distribution')
+    ax[i].title.set_text(titles[i])
     ax[i].set_xlabel(labels[i])
-    ax[i].set_ylabel('Count')
+    ax[i].set_ylabel('Amount')
 ```
 
 
@@ -394,8 +395,12 @@ print("Following, we will analyze both KMeans with ", kl.elbow, " and with ", si
 
 ```
 
+    C:\Users\annma\anaconda3\lib\site-packages\sklearn\cluster\_kmeans.py:881: UserWarning: KMeans is known to have a memory leak on Windows with MKL, when there are less chunks than available threads. You can avoid it by setting the environment variable OMP_NUM_THREADS=1.
+      warnings.warn(
 
-![png](README_files/README_12_0.png)
+
+
+![png](README_files/README_12_1.png)
 
 
     The optimal cluster amount based on silhouette coefficient method is  11
@@ -494,8 +499,8 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 ![png](README_files/README_15_1.png)
 
 
-    The largest of  4  clusters is: Cluster  0
-    The largest of  11  clusters is: Cluster  1
+    The largest of  4  clusters is: Cluster  3
+    The largest of  11  clusters is: Cluster  0
 
 
 As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
@@ -526,12 +531,79 @@ plt.title('Average of feature rate')
 for idx,bar_plt in enumerate(bar_plt):
         height = bar_plt.get_height()
         plt.text(bar_plt.get_x() + bar_plt.get_width()/2., height,
-                round(vals[idx],1),
+                round(vals[idx],2),
                 ha='center', va='bottom', rotation=0)
 ```
 
 
 ![png](README_files/README_18_0.png)
+
+
+# Non-linear-regression
+## Dataset preparation
+
+
+```python
+training_set, test_set = train_test_split(candyDataAll, test_size=0.3, random_state = 100)
+validation_set, test_set = train_test_split(test_set, test_size=0.5, random_state = 100)
+
+#sugar
+X_train_s = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_train_s = training_set['sugarpercent']
+
+X_test_s = training_set.drop(winpercent['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_test_s = training_set['sugarpercent']
+
+X_validation_s = training_set.drop(winpercent['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_validation_s = training_set['sugarpercent']
+
+#price
+X_train_p = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_train_p = training_set['pricepercent']
+
+X_test_p = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_test_p = training_set['pricepercent']
+
+X_validation_p = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_validation_p = training_set['pricepercent']
+
+#win
+X_train_w = training_set.drop(columns = ['competitorname', 'winpercent'])
+y_train_w = training_set['winpercent']
+
+X_test_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_test_w = training_set['winpercent']
+
+X_validation_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_validation_w = training_set['winpercent']
+```
+
+
+    ---------------------------------------------------------------------------
+
+    NameError                                 Traceback (most recent call last)
+
+    <ipython-input-24-a5e3aba8a02b> in <module>
+          6 y_train_s = training_set['sugarpercent']
+          7 
+    ----> 8 X_test_s = training_set.drop(winpercent['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+          9 y_test_s = training_set['sugarpercent']
+         10 
+
+
+    NameError: name 'winpercent' is not defined
+
+
+
+```python
+
+```
+
+
+
+
+    59
+
 
 
 
