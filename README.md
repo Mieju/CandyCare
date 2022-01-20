@@ -506,8 +506,8 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 ![png](README_files/README_15_1.png)
 
 
-    The largest of  4  clusters is: Cluster  0
-    The largest of  11  clusters is: Cluster  1
+    The largest of  4  clusters is: Cluster  3
+    The largest of  11  clusters is: Cluster  0
 
 
 As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
@@ -590,8 +590,8 @@ print("MAE =", mean_absolute_error(y_test_s,y_pred_s))
 print("MSE =", mean_squared_error(y_test_s,y_pred_s))
 ```
 
-    MAE = 0.23159354890300168
-    MSE = 0.07675913321392591
+    MAE = 0.21432218107351683
+    MSE = 0.06712060846907889
 
 
 ### Create pricepercent-predictor
@@ -605,8 +605,8 @@ print("MAE =", mean_absolute_error(y_test_p,y_pred_p))
 print("MSE =", mean_squared_error(y_test_p,y_pred_p))
 ```
 
-    MAE = 0.19037994676041622
-    MSE = 0.047965134876917
+    MAE = 0.19046294187270557
+    MSE = 0.047888440852615
 
 
 ### Create winpercent-predictor
@@ -620,8 +620,8 @@ print("MAE =", mean_absolute_error(y_test_w,y_pred_w))
 print("MSE =", mean_squared_error(y_test_w,y_pred_w))
 ```
 
-    MAE = 0.0009694293216735291
-    MSE = 1.5422158000868653e-06
+    MAE = 0.09865609931313746
+    MSE = 0.016206188738581505
 
 
 ### Create Methods
@@ -643,74 +643,16 @@ def predWin_RF(dataline):
 
 
 ```python
-colors = plt.cm.BuPu(np.linspace(0.2, 0.5, len(test_set.columns)))
-plt.barh(test_set.drop(columns = ['winpercent']).columns, clf_w.feature_importances_, color=colors)
+colors = plt.cm.BuPu(np.linspace(0.2, 0.5, len(X_train_w.columns)))
+plt.barh(X_train_w.columns, clf_w.feature_importances_, color=colors)
 plt.title("Feature importance")
 ```
 
 
-    ---------------------------------------------------------------------------
-
-    ValueError                                Traceback (most recent call last)
-
-    <ipython-input-22-b3ab32e15585> in <module>
-          1 colors = plt.cm.BuPu(np.linspace(0.2, 0.5, len(test_set.columns)))
-    ----> 2 plt.barh(test_set.drop(columns = ['winpercent']).columns, clf_w.feature_importances_, color=colors)
-          3 plt.title("Feature importance")
 
 
-    ~\anaconda3\lib\site-packages\matplotlib\pyplot.py in barh(y, width, height, left, align, **kwargs)
-       2500 @_copy_docstring_and_deprecators(Axes.barh)
-       2501 def barh(y, width, height=0.8, left=None, *, align='center', **kwargs):
-    -> 2502     return gca().barh(
-       2503         y, width, height=height, left=left, align=align, **kwargs)
-       2504 
+    Text(0.5, 1.0, 'Feature importance')
 
-
-    ~\anaconda3\lib\site-packages\matplotlib\axes\_axes.py in barh(self, y, width, height, left, align, **kwargs)
-       2628         """
-       2629         kwargs.setdefault('orientation', 'horizontal')
-    -> 2630         patches = self.bar(x=left, height=height, width=width, bottom=y,
-       2631                            align=align, **kwargs)
-       2632         return patches
-
-
-    ~\anaconda3\lib\site-packages\matplotlib\__init__.py in inner(ax, data, *args, **kwargs)
-       1445     def inner(ax, *args, data=None, **kwargs):
-       1446         if data is None:
-    -> 1447             return func(ax, *map(sanitize_sequence, args), **kwargs)
-       1448 
-       1449         bound = new_sig.bind(ax, *args, **kwargs)
-
-
-    ~\anaconda3\lib\site-packages\matplotlib\axes\_axes.py in bar(self, x, height, width, bottom, align, **kwargs)
-       2428                 yerr = self._convert_dx(yerr, y0, y, self.convert_yunits)
-       2429 
-    -> 2430         x, height, width, y, linewidth = np.broadcast_arrays(
-       2431             # Make args iterable too.
-       2432             np.atleast_1d(x), height, width, y, linewidth)
-
-
-    <__array_function__ internals> in broadcast_arrays(*args, **kwargs)
-
-
-    ~\anaconda3\lib\site-packages\numpy\lib\stride_tricks.py in broadcast_arrays(subok, *args)
-        536     args = [np.array(_m, copy=False, subok=subok) for _m in args]
-        537 
-    --> 538     shape = _broadcast_shape(*args)
-        539 
-        540     if all(array.shape == shape for array in args):
-
-
-    ~\anaconda3\lib\site-packages\numpy\lib\stride_tricks.py in _broadcast_shape(*args)
-        418     # use the old-iterator because np.nditer does not handle size 0 arrays
-        419     # consistently
-    --> 420     b = np.broadcast(*args[:32])
-        421     # unfortunately, it cannot handle 32 or more arguments directly
-        422     for pos in range(32, len(args), 31):
-
-
-    ValueError: shape mismatch: objects cannot be broadcast to a single shape
 
 
 
@@ -719,5 +661,5 @@ plt.title("Feature importance")
 
 
 ```python
-
+            
 ```
