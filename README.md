@@ -281,6 +281,18 @@ plt.show()
 ![png](README_files/README_7_0.png)
 
 
+
+```python
+#Attribute correlation analysis
+candyData = candyDataAll.drop(columns=['competitorname'])
+corr = candyData.corr(method='pearson')
+heatmap = sns.heatmap(corr, linewidth=0.5,cmap="YlGnBu").invert_yaxis()
+```
+
+
+![png](README_files/README_8_0.png)
+
+
 ### Inspect feature distribution
 
 
@@ -305,7 +317,7 @@ for i in range(3):
 ```
 
 
-![png](README_files/README_9_0.png)
+![png](README_files/README_10_0.png)
 
 
 ## Cluster Analysis
@@ -382,12 +394,8 @@ print("Following, we will analyze both KMeans with ", kl.elbow, " and with ", si
 
 ```
 
-    C:\Users\annma\anaconda3\lib\site-packages\sklearn\cluster\_kmeans.py:881: UserWarning: KMeans is known to have a memory leak on Windows with MKL, when there are less chunks than available threads. You can avoid it by setting the environment variable OMP_NUM_THREADS=1.
-      warnings.warn(
 
-
-
-![png](README_files/README_11_1.png)
+![png](README_files/README_12_0.png)
 
 
     The optimal cluster amount based on silhouette coefficient method is  11
@@ -479,15 +487,15 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 ```
 
 
-![png](README_files/README_14_0.png)
+![png](README_files/README_15_0.png)
 
 
 
-![png](README_files/README_14_1.png)
+![png](README_files/README_15_1.png)
 
 
     The largest of  4  clusters is: Cluster  0
-    The largest of  11  clusters is: Cluster  4
+    The largest of  11  clusters is: Cluster  1
 
 
 As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
@@ -523,7 +531,7 @@ for idx,bar_plt in enumerate(bar_plt):
 ```
 
 
-![png](README_files/README_17_0.png)
+![png](README_files/README_18_0.png)
 
 
 
