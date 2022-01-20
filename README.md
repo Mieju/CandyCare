@@ -506,8 +506,8 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 ![png](README_files/README_15_1.png)
 
 
-    The largest of  4  clusters is: Cluster  1
-    The largest of  11  clusters is: Cluster  5
+    The largest of  4  clusters is: Cluster  3
+    The largest of  11  clusters is: Cluster  4
 
 
 As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
@@ -559,22 +559,22 @@ training_set, test_set = train_test_split(candyDataProcessed, test_size=0.2, ran
 X_train_s = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_train_s = training_set['sugarpercent']
 
-X_test_s = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
-y_test_s = training_set['sugarpercent']
+X_test_s = test_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_test_s = test_set['sugarpercent']
 
 #price
 X_train_p = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_train_p = training_set['pricepercent']
 
-X_test_p = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
-y_test_p = training_set['pricepercent']
+X_test_p = test_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_test_p = test_set['pricepercent']
 
 #win
 X_train_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_train_w = training_set['winpercent']
 
-X_test_w = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
-y_test_w = training_set['winpercent']
+X_test_w = test_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+y_test_w = test_set['winpercent']
 
 ```
 
@@ -590,8 +590,8 @@ print("MAE =", mean_absolute_error(y_test_s,y_pred_s))
 print("Score (Acc) =", clf_s.score(X_test_s,y_test_s))
 ```
 
-    MAE = 0.19496121423048857
-    Score (Acc) = 0.28947843541575746
+    MAE = 0.21179135055836054
+    Score (Acc) = -0.2957797247344931
 
 
 ### Create pricepercent-predictor
@@ -605,8 +605,8 @@ print("MAE =", mean_absolute_error(y_test_p,y_pred_p))
 print("Score (Acc) =", clf_p.score(X_test_p,y_test_p))
 ```
 
-    MAE = 0.15298698476539369
-    Score (Acc) = 0.4391069150662821
+    MAE = 0.19030843980653467
+    Score (Acc) = 0.4569171281358497
 
 
 ### Create winpercent-predictor
@@ -620,8 +620,8 @@ print("MAE =", mean_absolute_error(y_test_w,y_pred_w))
 print("Score (Acc) =", clf_w.score(X_test_w,y_test_w))
 ```
 
-    MAE = 0.0564882607187665
-    Score (Acc) = 0.7107847959923121
+    MAE = 0.1159967510149107
+    Score (Acc) = 0.12550801134112377
 
 
 ### Create Methods
