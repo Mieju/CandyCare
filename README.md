@@ -327,19 +327,7 @@ for i in range(3):
 ```
 
 
-    ---------------------------------------------------------------------------
-
-    NameError                                 Traceback (most recent call last)
-
-    <ipython-input-1-138d0e22d484> in <module>
-          1 # Feature distribution
-    ----> 2 sugar = candyDataAll['sugarpercent']*100
-          3 price = candyDataAll['pricepercent']*100
-          4 win = candyDataAll['winpercent']
-          5 colors = ['tab:red', 'tab:green', 'tab:blue']
-
-
-    NameError: name 'candyDataAll' is not defined
+![png](README_files/README_10_0.png)
 
 
 ## Cluster Analysis
@@ -416,8 +404,12 @@ print("Following, we will analyze both KMeans with ", kl.elbow, " and with ", si
 
 ```
 
+    C:\Users\annma\anaconda3\lib\site-packages\sklearn\cluster\_kmeans.py:881: UserWarning: KMeans is known to have a memory leak on Windows with MKL, when there are less chunks than available threads. You can avoid it by setting the environment variable OMP_NUM_THREADS=1.
+      warnings.warn(
 
-![png](README_files/README_12_0.png)
+
+
+![png](README_files/README_12_1.png)
 
 
     The optimal cluster amount based on silhouette coefficient method is  11
@@ -516,8 +508,8 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 ![png](README_files/README_15_1.png)
 
 
-    The largest of  4  clusters is: Cluster  2
-    The largest of  11  clusters is: Cluster  3
+    The largest of  4  clusters is: Cluster  1
+    The largest of  11  clusters is: Cluster  1
 
 
 As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
@@ -588,7 +580,7 @@ y_test_w = test_set['winpercent']
 
 ```
 
-## Random forest regressor
+## Random forest regressor vs K Neighbors regressor
 ### Create sugarpercent-predictor
 
 
@@ -596,12 +588,49 @@ y_test_w = test_set['winpercent']
 clf_s=RandomForestRegressor(n_estimators=100)
 clf_s.fit(X_train_s, y_train_s)
 y_pred_s = clf_s.predict(X_test_s)
-print("MAE =", mean_absolute_error(y_test_s,y_pred_s))
+maeRF = mean_absolute_error(y_test_s,y_pred_s)
+mseRF = mean_squared_error(y_test_s,y_pred_s)
+print("Random Forest Regressor:")
+print("MAE =", maeRF)
 print("MSE =", mean_squared_error(y_test_s,y_pred_s))
+
+print("\nKNN:")
+knn_regressor_s = KNeighborsRegressor(n_neighbors = 5, p = 2, weights = 'uniform')
+knn_regressor_s.fit(X_train_s, y_train_s)
+y_pred_s_knn = knn_regressor_s.predict(X_test_s)
+maeKNN = mean_absolute_error(y_test_s,y_pred_s_knn)
+mseKNN = mean_squared_error(y_test_s,y_pred_s_knn)
+print("MAE =", maeKNN)
+print("MSE =", mean_squared_error(y_test_s,y_pred_s_knn))
+
+fig, ax = plt.subplots(1,2)
+fig.set_figwidth(10)
+ax[0].bar('RF', maeRF, color = 'blue', alpha = 0.6)
+ax[0].bar('KNN', maeKNN, color = 'green', alpha = 0.6)
+ax[0].set_title('MAE')
+ax[1].bar('RF', mseRF, color = 'blue', alpha = 0.6)
+ax[1].bar('KNN', mseKNN, color = 'green', alpha = 0.6)
+ax[1].set_title('MSE')
 ```
 
-    MAE = 0.21882942913833026
-    MSE = 0.06873529287587565
+    Random Forest Regressor:
+    MAE = 0.22200323236407035
+    MSE = 0.07064229547377364
+    
+    KNN:
+    MAE = 0.18595293569411764
+    MSE = 0.051384613313487246
+
+
+
+
+
+    Text(0.5, 1.0, 'MSE')
+
+
+
+
+![png](README_files/README_22_2.png)
 
 
 ### Create pricepercent-predictor
@@ -611,12 +640,49 @@ print("MSE =", mean_squared_error(y_test_s,y_pred_s))
 clf_p=RandomForestRegressor(n_estimators=100)
 clf_p.fit(X_train_p, y_train_p)
 y_pred_p = clf_p.predict(X_test_p)
-print("MAE =", mean_absolute_error(y_test_p,y_pred_p))
-print("MSE =", mean_squared_error(y_test_p,y_pred_p))
+maeRF = mean_absolute_error(y_test_p,y_pred_p)
+mseRF = mean_squared_error(y_test_p,y_pred_p)
+print("Random Forest Regressor:")
+print("MAE =", maeRF)
+print("MSE =", mseRF)
+
+print("\nKNN:")
+knn_regressor_p = KNeighborsRegressor(n_neighbors = 5, p = 2, weights = 'uniform')
+knn_regressor_p.fit(X_train_p, y_train_p)
+y_pred_p_knn = knn_regressor_p.predict(X_test_p)
+maeKNN = mean_absolute_error(y_test_p,y_pred_p_knn)
+mseKNN = mean_squared_error(y_test_p,y_pred_p_knn)
+print("MAE =", maeKNN)
+print("MSE =", mseKNN)
+
+fig, ax = plt.subplots(1,2)
+fig.set_figwidth(10)
+ax[0].bar('RF', maeRF, color = 'blue', alpha = 0.6)
+ax[0].bar('KNN', maeKNN, color = 'green', alpha = 0.6)
+ax[0].set_title('MAE')
+ax[1].bar('RF', mseRF, color = 'blue', alpha = 0.6)
+ax[1].bar('KNN', mseKNN, color = 'green', alpha = 0.6)
+ax[1].set_title('MSE')
 ```
 
-    MAE = 0.19310535416801825
-    MSE = 0.04948307278493425
+    Random Forest Regressor:
+    MAE = 0.19182341317963567
+    MSE = 0.04882941777571
+    
+    KNN:
+    MAE = 0.1706823507058824
+    MSE = 0.04297164665854133
+
+
+
+
+
+    Text(0.5, 1.0, 'MSE')
+
+
+
+
+![png](README_files/README_24_2.png)
 
 
 ### Create winpercent-predictor
@@ -626,64 +692,51 @@ print("MSE =", mean_squared_error(y_test_p,y_pred_p))
 clf_w=RandomForestRegressor(n_estimators=100)
 clf_w.fit(X_train_w, y_train_w)
 y_pred_w = clf_w.predict(X_test_w)
-print("MAE =", mean_absolute_error(y_test_w,y_pred_w))
-print("MSE =", mean_squared_error(y_test_w,y_pred_w))
-```
+maeRF = mean_absolute_error(y_test_w,y_pred_w)
+mseRF = mean_squared_error(y_test_w,y_pred_w)
+print("Random Forest Regressor:")
+print("MAE =", maeRF)
+print("MSE =", mseRF)
 
-    MAE = 0.09533035462284334
-    MSE = 0.01539841273695784
-
-
-## K Neighbors regressor
-### Create sugarpercent-predictor
-
-
-```python
-knn_regressor_s = KNeighborsRegressor(n_neighbors = 5, 
-                                    p = 2, 
-                                    weights = 'uniform')
-knn_regressor_s.fit(X_train_s, y_train_s)
-y_pred_s_knn = knn_regressor_s.predict(X_test_s)
-print("MAE =", mean_absolute_error(y_test_s,y_pred_s_knn))
-print("MSE =", mean_squared_error(y_test_s,y_pred_s_knn))
-```
-
-    MAE = 0.1805411732
-    MSE = 0.04525526821221666
-
-
-### Create pricepercent-predictor
-
-
-```python
-knn_regressor_p = KNeighborsRegressor(n_neighbors = 5, 
-                                    p = 2, 
-                                    weights = 'uniform')
-knn_regressor_p.fit(X_train_p, y_train_p)
-y_pred_p_knn = knn_regressor_p.predict(X_test_p)
-print("MAE =", mean_absolute_error(y_test_p,y_pred_p_knn))
-print("MSE =", mean_squared_error(y_test_p,y_pred_p_knn))
-```
-
-    MAE = 0.20861176423529415
-    MSE = 0.05977085202658836
-
-
-### Create winpercent-predictor
-
-
-```python
+print("\nKNN:")
 knn_regressor_w = KNeighborsRegressor(n_neighbors = 5, 
                                     p = 2, 
                                     weights = 'uniform')
 knn_regressor_w.fit(X_train_w, y_train_w)
 y_pred_w_knn = knn_regressor_w.predict(X_test_w)
-print("MAE =", mean_absolute_error(y_test_w,y_pred_w_knn))
-print("MSE =", mean_squared_error(y_test_w,y_pred_w_knn))
+maeKNN = mean_absolute_error(y_test_w,y_pred_w_knn)
+mseKNN = mean_squared_error(y_test_w,y_pred_w_knn)
+print("MAE =", maeKNN)
+print("MSE =", mseKNN)
+
+fig, ax = plt.subplots(1,2)
+fig.set_figwidth(10)
+ax[0].bar('RF', maeRF, color = 'blue', alpha = 0.6)
+ax[0].bar('KNN', maeKNN, color = 'green', alpha = 0.6)
+ax[0].set_title('MAE')
+ax[1].bar('RF', mseRF, color = 'blue', alpha = 0.6)
+ax[1].bar('KNN', mseKNN, color = 'green', alpha = 0.6)
+ax[1].set_title('MSE')
 ```
 
+    Random Forest Regressor:
+    MAE = 0.09566050884990222
+    MSE = 0.01492374841046988
+    
+    KNN:
     MAE = 0.09626410952941178
     MSE = 0.013005556901130064
+
+
+
+
+
+    Text(0.5, 1.0, 'MSE')
+
+
+
+
+![png](README_files/README_26_2.png)
 
 
 ### Create Methods
@@ -691,14 +744,6 @@ print("MSE =", mean_squared_error(y_test_w,y_pred_w_knn))
 
 ```python
 # dataline should have the format of a Dataframe!
-def predSugar_RF(dataline):
-    return clf_s.predict(dataline)
-
-def predPrice_RF(dataline):
-    return clf_p.predict(dataline)
-
-def predWin_RF(dataline):
-    return clf_w.predict(dataline)
 
 def predSugar_KNN(dataline):
     return knn_regressor_s.predict(dataline)
@@ -707,6 +752,10 @@ def predPrice_KNN(dataline):
     return knn_regressor_p.predict(dataline)
 
 def predWin_KNN(dataline):
+    sugar = predSugar_KNN(dataline)
+    price = predPrice_KNN(dataline)
+    dataline['sugarpercent'] = sugar
+    dataline['pricepercent'] = price
     return knn_regressor_w.predict(dataline)
 ```
 
@@ -734,13 +783,43 @@ plt.title("Feature importance")
 
 
 
-![png](README_files/README_36_1.png)
+![png](README_files/README_30_1.png)
 
 
 
 ```python
+stoplist = ['hard', 'fruity', 'pluribus']
+red = []
+green = []
+for i in range(0,len(f_imp)):
+    if f_imp[i][0] in stoplist:
+        red.append(f_imp[i])
+    else:
+        green.append(f_imp[i])
+        
+columns = [f_i[0] for f_i in red]
+values = [f_i[1] for f_i in red]
+plt.barh(columns, values,  color='red', alpha = 0.4)
+plt.title("Feature importance")
+
+
+columns = [f_i[0] for f_i in green]
+values = [f_i[1] for f_i in green]
+plt.barh(columns, values, color='green', alpha=0.4)
+
 
 ```
+
+
+
+
+    <BarContainer object of 8 artists>
+
+
+
+
+![png](README_files/README_31_1.png)
+
 
 ### Predict New Candy
 
@@ -750,85 +829,6 @@ newCandy = {'competitorname': 'test', 'chocolate':1, 'fruity':0, 'caramel':0, 'p
 dataline = pd.DataFrame(columns= candyDataAll.columns)
 dataline = dataline.append(newCandy, ignore_index=True)
 dataline = dataline.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
-
-pred_sugar = predSugar_RF(dataline)
-pred_price = predPrice_RF(dataline)
-dataline['sugarpercent'] = pred_sugar[0]
-dataline['pricepercent'] = pred_price[0]
-
-pred_win = predWin_RF(dataline)
-dataline['winpercent'] = pred_win[0]
-dataline
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>chocolate</th>
-      <th>fruity</th>
-      <th>caramel</th>
-      <th>peanutyalmondy</th>
-      <th>nougat</th>
-      <th>crispedricewafer</th>
-      <th>hard</th>
-      <th>bar</th>
-      <th>pluribus</th>
-      <th>sugarpercent</th>
-      <th>pricepercent</th>
-      <th>winpercent</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>1</td>
-      <td>0</td>
-      <td>0.464404</td>
-      <td>0.821808</td>
-      <td>0.654776</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-newCandy = {'competitorname': 'test', 'chocolate':1, 'fruity':0, 'caramel':0, 'peanutyalmondy':1, 'nougat':0, 'crispedricewafer':0, 'hard':0, 'bar':1, 'pluribus':0, 'sugarpercent':0.3, 'pricepercent':0.5, 'winpercent':0.4}
-dataline = pd.DataFrame(columns= candyDataAll.columns)
-dataline = dataline.append(newCandy, ignore_index=True)
-dataline = dataline.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
-
-pred_sugar = predSugar_KNN(dataline)
-pred_price = predPrice_KNN(dataline)
-dataline['sugarpercent'] = pred_sugar[0]
-dataline['pricepercent'] = pred_price[0]
 
 pred_win = predWin_KNN(dataline)
 dataline['winpercent'] = pred_win[0]
