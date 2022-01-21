@@ -820,7 +820,7 @@ plt.title("Feature importance")
 
 
 ```python
-stoplist = ['hard', 'fruity', 'pluribus']
+stoplist = ['hard', 'fruity']
 red = []
 green = []
 for i in range(0,len(f_imp)):
@@ -845,7 +845,7 @@ plt.barh(columns, values, color='green', alpha=0.4)
 
 
 
-    <BarContainer object of 8 artists>
+    <BarContainer object of 9 artists>
 
 
 
@@ -853,6 +853,7 @@ plt.barh(columns, values, color='green', alpha=0.4)
 ![png](README_files/README_30_1.png)
 
 
+## Predict New Candy
 ### Create Methods
 
 
@@ -876,7 +877,7 @@ def predWin_All_KNN(dataline):
     return knn_regressor_w.predict(dataline)
 ```
 
-### Predict New Candy
+### Predict
 
 
 ```python
@@ -894,7 +895,6 @@ dataline = dataline.append(goodCandy, ignore_index=True)
 pred_win = predWin_KNN(dataline)
 
 dataline['winpercent'] = pred_win
-dataline
 ```
 
 
@@ -969,8 +969,11 @@ dataline
 
 
 
+### Evaluate
+
 
 ```python
+dataline
 plt.bar(['goodCandy','badCandy'],dataline['winpercent'], color='violet', alpha=0.8)
 ```
 
@@ -982,5 +985,18 @@ plt.bar(['goodCandy','badCandy'],dataline['winpercent'], color='violet', alpha=0
 
 
 
-![png](README_files/README_36_1.png)
+![png](README_files/README_37_1.png)
 
+
+# Conclusions
+After exploring, analyzing and computing on the base of the "halloween candy ranking" dataset following results and findings were gathered:
+
+1. While producing a new candy one should primarily consider the features choloate, bar and peanutyalmondy. Furthermore, the attributes caramel, nougat, pluribus and crispedricewafer. Contrary attributes like fruity and hard should be avoided.
+
+3. For the optimization and consultation on the creation of new candy products, a machine learning model was created. It predicts the sugarpercent, pricepercent and the winpercent of a given candy.
+
+
+
+```python
+
+```
