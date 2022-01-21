@@ -1,12 +1,25 @@
-# CandyCare
+```python
+from IPython.display import Image
+Image(filename='unknown.png') 
+```
+
+
+
+
+![png](README_files/README_0_0.png)
+
+
 
 __PML WS 2021/22__ <br>
 _by Julian Mierisch and Anna Martynova_
 
 ### Goals
-1. Make Model which predicts which win percentage a given new candy has
-2. Predict which combination has highest win propability
-3. Cluster data
+1. Cluster Analysis
+    - to understand how many groups there are in the data and their chrarcteristics
+2. Prediction Models
+    - one for sugarpercent
+    - one for pricepercent
+    - on for winpercent
 
 ### Import packages and data
 
@@ -18,22 +31,24 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
 import seaborn as sns
+
+from sklearn.metrics import silhouette_score
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+
 from sklearn.cluster import KMeans
 from sklearn.datasets import make_blobs
-from sklearn.metrics import silhouette_score
-from kneed import KneeLocator
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import KNeighborsRegressor
 from operator import itemgetter
-# conda install -c conda-forge kneed
+from kneed import KneeLocator
+import warnings
+warnings.filterwarnings('ignore')
 ```
 
 
@@ -267,11 +282,12 @@ candyDataAll
 
 
 ```python
-#Show distribution of candy attributes in dataset
+#Manipulate data to only get attributes
 candyAttributes = candyDataAll.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 data = {'Attributes': candyAttributes.columns, 'Values': candyAttributes.sum()/len(candyAttributes)}  
 candyAttrPercent = pd.DataFrame(data).reset_index().drop(columns=['index']).sort_values(by=['Values'])
 
+#Plot graph
 fig, ax = plt.subplots()
 def add_value_label(x_list,y_list):
     for i in range(1, len(x_list)+1):
@@ -337,12 +353,6 @@ To analyze which features are most beneficial for high win percentage, we have t
 
 
 ```python
-from sklearn.cluster import KMeans
-from sklearn.datasets import make_blobs
-from sklearn.metrics import silhouette_score
-from kneed import KneeLocator
-# conda install -c conda-forge kneed
-
 kmeans = KMeans(n_clusters = 2)
 candyData = candyDataAll.drop(columns=['winpercent','competitorname'])
 
@@ -356,7 +366,6 @@ kmeans_kwargs = {
 fig, ax = plt.subplots(1,2)
 fig.set_figwidth(15)
 
-# https://realpython.com/k-means-clustering-python/#:~:text=The%20k%2Dmeans%20clustering%20method,data%20objects%20in%20a%20dataset.&text=These%20traits%20make%20implementing%20k,novice%20programmers%20and%20data%20scientists.
 # to choose the appropriate number of clusters:
 # silhouette coefficient = measure of cluster cohesion and separation
 # values range between -1 and 1. Larger numbers indicate that samples are closer to their clusters than they are to other clusters
@@ -404,12 +413,8 @@ print("Following, we will analyze both KMeans with ", kl.elbow, " and with ", si
 
 ```
 
-    C:\Users\annma\anaconda3\lib\site-packages\sklearn\cluster\_kmeans.py:881: UserWarning: KMeans is known to have a memory leak on Windows with MKL, when there are less chunks than available threads. You can avoid it by setting the environment variable OMP_NUM_THREADS=1.
-      warnings.warn(
 
-
-
-![png](README_files/README_12_1.png)
+![png](README_files/README_12_0.png)
 
 
     The optimal cluster amount based on silhouette coefficient method is  11
@@ -508,8 +513,8 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 ![png](README_files/README_15_1.png)
 
 
-    The largest of  4  clusters is: Cluster  3
-    The largest of  11  clusters is: Cluster  5
+    The largest of  4  clusters is: Cluster  1
+    The largest of  11  clusters is: Cluster  1
 
 
 As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
@@ -517,6 +522,7 @@ As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the hig
 
 ```python
 awpIdx = [winRates.index(max(winRates)), winRates.index(min(winRates))]
+awpIdx_vals = [max(winRates), min(winRates)]
 clusterCandies = [pd.DataFrame(columns=candyDataAll.columns), pd.DataFrame(columns=candyDataAll.columns)]
 
 fig, ax = plt.subplots(1,2)
@@ -537,120 +543,54 @@ for i in range(2):
     ax[i].set_xticklabels(clusterCandies[i].columns, rotation = 'vertical')
     ax[i].set_xlabel('Features')
     ax[i].set_ylabel('Average occurency')
-    ax[i].set_title('Average of feature rate in cluster with awp = ' + str(awpIdx[i]))
+    ax[i].set_title('Average of feature rate (in cluster awp = ' + str(awpIdx_vals[i]) + ')') 
 
     for idx,bar_plt in enumerate(bar_plt):
         height = bar_plt.get_height()
         ax[i].text(bar_plt.get_x() + bar_plt.get_width()/2., height,
                 round(vals[idx],2),
                 ha='center', va='bottom', rotation=0)
+plt.show()
+print("Blacklist: fruity, hard")
+print("Whitelist: fruity, hard")
 ```
 
 
-```python
-
-```
+![png](README_files/README_17_0.png)
 
 
-![png](README_files/README_18_0.png)
+    Blacklist: fruity, hard
+    Whitelist: fruity, hard
 
 
-
-```python
-awpIdx = winRates.index(min(winRates))
-clusterCandies = pd.DataFrame(columns=candyDataAll.columns)
-
-for k in cD[label==awpIdx]:
-    clusterCandies = clusterCandies.append(candyDataAll.loc[np.where(cD==k)[0][0]])
-
-clusterCandies = clusterCandies.drop(columns=['winpercent','competitorname'])
-vals = []
-for factor in clusterCandies.columns:
-    vals.append(sum(clusterCandies[factor])/len(clusterCandies))
-    
-
-colors = plt.cm.BuPu(np.linspace(0.2, 0.5, len(vals)))
-bar_plt = plt.bar(range(0,len(vals)), vals, color=colors, tick_label=clusterCandies.columns)
-plt.xticks(rotation = 'vertical')
-plt.xlabel('Features')
-plt.ylabel('Average occurency in cluster')
-plt.title('Average of feature rate at cluster with awp = ', awpIdx)
-
-for idx,bar_plt in enumerate(bar_plt):
-        height = bar_plt.get_height()
-        plt.text(bar_plt.get_x() + bar_plt.get_width()/2., height,
-                round(vals[idx],2),
-                ha='center', va='bottom', rotation=0)
-```
-
-
-    ---------------------------------------------------------------------------
-
-    TypeError                                 Traceback (most recent call last)
-
-    <ipython-input-35-80f8025884e8> in <module>
-         16 plt.xlabel('Features')
-         17 plt.ylabel('Average occurency in cluster')
-    ---> 18 plt.title('Average of feature rate at cluster with awp = ', awpIdx)
-         19 
-         20 for idx,bar_plt in enumerate(bar_plt):
-
-
-    ~\anaconda3\lib\site-packages\matplotlib\pyplot.py in title(label, fontdict, loc, pad, y, **kwargs)
-       3106 @_copy_docstring_and_deprecators(Axes.set_title)
-       3107 def title(label, fontdict=None, loc=None, pad=None, *, y=None, **kwargs):
-    -> 3108     return gca().set_title(
-       3109         label, fontdict=fontdict, loc=loc, pad=pad, y=y, **kwargs)
-       3110 
-
-
-    ~\anaconda3\lib\site-packages\matplotlib\axes\_axes.py in set_title(self, label, fontdict, loc, pad, y, **kwargs)
-        190         title.update(default)
-        191         if fontdict is not None:
-    --> 192             title.update(fontdict)
-        193         title.update(kwargs)
-        194         return title
-
-
-    ~\anaconda3\lib\site-packages\matplotlib\text.py in update(self, kwargs)
-        169         # docstring inherited
-        170         # make a copy so we do not mutate user input!
-    --> 171         kwargs = dict(kwargs)
-        172         sentinel = object()  # bbox can be None, so use another sentinel.
-        173         # Update fontproperties first, as it has lowest priority.
-
-
-    TypeError: 'int' object is not iterable
-
-
-
-![png](README_files/README_19_1.png)
-
+#### Blacklist: fruity, hard
+#### Whitelist: choloate, bar, peanutalmondy, caramel, nogat, crispedricewafer
 
 # Non-linear-regression
 ## Dataset preparation
 
 
 ```python
+#Quick Preprocessing to adjust win percentage formatting
 candyDataProcessed = candyDataAll
 candyDataProcessed['winpercent'] = candyDataProcessed['winpercent']/100
 training_set, test_set = train_test_split(candyDataProcessed, test_size=0.2, random_state = 100)
 
-#sugar
+#sugarpercent
 X_train_s = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_train_s = training_set['sugarpercent']
 
 X_test_s = test_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_test_s = test_set['sugarpercent']
 
-#price
+#pricepercent
 X_train_p = training_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_train_p = training_set['pricepercent']
 
 X_test_p = test_set.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
 y_test_p = test_set['pricepercent']
 
-#win
+#winpercent
 X_train_w = training_set.drop(columns = ['competitorname', 'winpercent'])
 y_train_w = training_set['winpercent']
 
@@ -664,6 +604,31 @@ y_test_w = test_set['winpercent']
 
 
 ```python
+def find_opt_neighbors(X_train, y_train, X_test, y_test):
+    neighbor = 0
+    res = 1
+    for k in np.arange(5, 51, 5):
+        knn_regressor = KNeighborsRegressor(n_neighbors = k,  p = 2, weights = 'uniform')
+        knn_regressor.fit(X_train, y_train)
+        y_pred = knn_regressor.predict(X_test)
+        if mean_squared_error(y_pred,y_test, squared = False) < res:
+            res = mean_squared_error(y_pred,y_test, squared = False);
+            neighbor = k
+    return neighbor
+```
+
+
+```python
+res = []
+for k in np.arange(5, 51, 5):
+    knn_regressor = KNeighborsRegressor(n_neighbors = k, 
+                                    p = 2, 
+                                    weights = 'uniform')
+    knn_regressor.fit(X_train_s, y_train_s)
+    y_pred = knn_regressor.predict(X_test_s)
+    res.append([k,mean_squared_error(y_pred,y_test_s, squared = False)])
+
+#Random Forest
 clf_s=RandomForestRegressor(n_estimators=100)
 clf_s.fit(X_train_s, y_train_s)
 y_pred_s = clf_s.predict(X_test_s)
@@ -673,8 +638,10 @@ print("Random Forest Regressor:")
 print("MAE =", maeRF)
 print("MSE =", mean_squared_error(y_test_s,y_pred_s))
 
+# K Nearest Neighbors
 print("\nKNN:")
-knn_regressor_s = KNeighborsRegressor(n_neighbors = 5, p = 2, weights = 'uniform')
+knn_regressor_s = KNeighborsRegressor(n_neighbors = find_opt_neighbors(X_train_s, y_train_s, X_test_s, y_test_s),
+                                      p = 2, weights = 'uniform')
 knn_regressor_s.fit(X_train_s, y_train_s)
 y_pred_s_knn = knn_regressor_s.predict(X_test_s)
 maeKNN = mean_absolute_error(y_test_s,y_pred_s_knn)
@@ -682,6 +649,7 @@ mseKNN = mean_squared_error(y_test_s,y_pred_s_knn)
 print("MAE =", maeKNN)
 print("MSE =", mean_squared_error(y_test_s,y_pred_s_knn))
 
+#Plot
 fig, ax = plt.subplots(1,2)
 fig.set_figwidth(10)
 ax[0].bar('RF', maeRF, color = 'blue', alpha = 0.6)
@@ -693,12 +661,12 @@ ax[1].set_title('MSE')
 ```
 
     Random Forest Regressor:
-    MAE = 0.225818520088181
-    MSE = 0.07158040367971631
+    MAE = 0.21720461571006067
+    MSE = 0.06871034940680228
     
     KNN:
-    MAE = 0.18595293569411764
-    MSE = 0.051384613313487246
+    MAE = 0.16931528682352942
+    MSE = 0.047328772797732684
 
 
 
@@ -716,6 +684,7 @@ ax[1].set_title('MSE')
 
 
 ```python
+#Random Forest
 clf_p=RandomForestRegressor(n_estimators=100)
 clf_p.fit(X_train_p, y_train_p)
 y_pred_p = clf_p.predict(X_test_p)
@@ -725,8 +694,10 @@ print("Random Forest Regressor:")
 print("MAE =", maeRF)
 print("MSE =", mseRF)
 
+#K Nearest Neighbors
 print("\nKNN:")
-knn_regressor_p = KNeighborsRegressor(n_neighbors = 5, p = 2, weights = 'uniform')
+knn_regressor_p = KNeighborsRegressor(n_neighbors = find_opt_neighbors(X_train_p, y_train_p, X_test_p, y_test_p), 
+                                      p = 2, weights = 'uniform')
 knn_regressor_p.fit(X_train_p, y_train_p)
 y_pred_p_knn = knn_regressor_p.predict(X_test_p)
 maeKNN = mean_absolute_error(y_test_p,y_pred_p_knn)
@@ -734,6 +705,7 @@ mseKNN = mean_squared_error(y_test_p,y_pred_p_knn)
 print("MAE =", maeKNN)
 print("MSE =", mseKNN)
 
+#Plot
 fig, ax = plt.subplots(1,2)
 fig.set_figwidth(10)
 ax[0].bar('RF', maeRF, color = 'blue', alpha = 0.6)
@@ -745,8 +717,8 @@ ax[1].set_title('MSE')
 ```
 
     Random Forest Regressor:
-    MAE = 0.1871743516000883
-    MSE = 0.04582781020011431
+    MAE = 0.18420295328552205
+    MSE = 0.0456908420851074
     
     KNN:
     MAE = 0.1706823507058824
@@ -768,6 +740,7 @@ ax[1].set_title('MSE')
 
 
 ```python
+#Random Forest
 clf_w=RandomForestRegressor(n_estimators=100)
 clf_w.fit(X_train_w, y_train_w)
 y_pred_w = clf_w.predict(X_test_w)
@@ -777,10 +750,9 @@ print("Random Forest Regressor:")
 print("MAE =", maeRF)
 print("MSE =", mseRF)
 
+#K Nearest Neighbors
 print("\nKNN:")
-knn_regressor_w = KNeighborsRegressor(n_neighbors = 5, 
-                                    p = 2, 
-                                    weights = 'uniform')
+knn_regressor_w = KNeighborsRegressor(n_neighbors = 5, p = 2, weights = 'uniform')
 knn_regressor_w.fit(X_train_w, y_train_w)
 y_pred_w_knn = knn_regressor_w.predict(X_test_w)
 maeKNN = mean_absolute_error(y_test_w,y_pred_w_knn)
@@ -788,6 +760,7 @@ mseKNN = mean_squared_error(y_test_w,y_pred_w_knn)
 print("MAE =", maeKNN)
 print("MSE =", mseKNN)
 
+#Plot
 fig, ax = plt.subplots(1,2)
 fig.set_figwidth(10)
 ax[0].bar('RF', maeRF, color = 'blue', alpha = 0.6)
@@ -799,8 +772,8 @@ ax[1].set_title('MSE')
 ```
 
     Random Forest Regressor:
-    MAE = 0.09401314936637274
-    MSE = 0.014845846164174245
+    MAE = 0.09597995840176496
+    MSE = 0.015647639892574478
     
     KNN:
     MAE = 0.09626410952941178
@@ -817,29 +790,6 @@ ax[1].set_title('MSE')
 
 ![png](README_files/README_27_2.png)
 
-
-### Create Methods
-
-
-```python
-# dataline should have the format of a Dataframe!
-
-def predSugar_KNN(dataline):
-    return knn_regressor_s.predict(dataline)
-
-def predPrice_KNN(dataline):
-    return knn_regressor_p.predict(dataline)
-
-def predWin_KNN(dataline):
-    sugar = predSugar_KNN(dataline)
-    price = predPrice_KNN(dataline)
-    dataline['sugarpercent'] = sugar
-    dataline['pricepercent'] = price
-    return knn_regressor_w.predict(dataline)
-
-def predWin_All_KNN(dataline):
-    return knn_regressor_w.predict(dataline)
-```
 
 ### Feature importance
 
@@ -865,7 +815,7 @@ plt.title("Feature importance")
 
 
 
-![png](README_files/README_31_1.png)
+![png](README_files/README_29_1.png)
 
 
 
@@ -900,20 +850,50 @@ plt.barh(columns, values, color='green', alpha=0.4)
 
 
 
-![png](README_files/README_32_1.png)
+![png](README_files/README_30_1.png)
 
+
+### Create Methods
+
+
+```python
+# dataline should have the format of a Dataframe!
+
+def predSugar_KNN(dataline):
+    return knn_regressor_s.predict(dataline)
+
+def predPrice_KNN(dataline):
+    return knn_regressor_p.predict(dataline)
+
+def predWin_KNN(dataline):
+    sugar = predSugar_KNN(dataline)
+    price = predPrice_KNN(dataline)
+    dataline['sugarpercent'] = sugar
+    dataline['pricepercent'] = price
+    return knn_regressor_w.predict(dataline)
+
+def predWin_All_KNN(dataline):
+    return knn_regressor_w.predict(dataline)
+```
 
 ### Predict New Candy
 
 
 ```python
-newCandy = {'competitorname': 'test', 'chocolate':0, 'fruity':0, 'caramel':0, 'peanutyalmondy':0, 'nougat':0, 'crispedricewafer':0, 'hard':0, 'bar':0, 'pluribus':0, 'sugarpercent':0.3, 'pricepercent':0.5, 'winpercent':0.4}
 dataline = pd.DataFrame(columns= candyDataAll.columns)
-dataline = dataline.append(newCandy, ignore_index=True)
 dataline = dataline.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
+```
 
+
+```python
+badCandy = {'chocolate':0, 'fruity':1, 'caramel':0, 'peanutyalmondy':0, 'nougat':0, 'crispedricewafer':0, 'hard':1, 'bar':0, 'pluribus':0}
+goodCandy = {'chocolate':1, 'fruity':0, 'caramel':1, 'peanutyalmondy':1, 'nougat':1, 'crispedricewafer':1, 'hard':0, 'bar':1, 'pluribus':0}
+
+dataline = dataline.append(badCandy, ignore_index=True)
+dataline = dataline.append(goodCandy, ignore_index=True)
 pred_win = predWin_KNN(dataline)
-dataline['winpercent'] = pred_win[0]
+
+dataline['winpercent'] = pred_win
 dataline
 ```
 
@@ -956,86 +936,32 @@ dataline
     <tr>
       <th>0</th>
       <td>0</td>
+      <td>1</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
+      <td>1</td>
       <td>0</td>
       <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0.3622</td>
-      <td>0.3484</td>
-      <td>0.395358</td>
+      <td>0.46688</td>
+      <td>0.3088</td>
+      <td>0.384180</td>
     </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-newCandy = {'competitorname': 'test', 'chocolate':0, 'fruity':0, 'caramel':0, 'peanutyalmondy':0, 'nougat':0, 'crispedricewafer':0, 'hard':0, 'bar':0, 'pluribus':0, 'sugarpercent':0.0, 'pricepercent':0.0, 'winpercent':0.4}
-dataline = pd.DataFrame(columns= candyDataAll.columns)
-dataline = dataline.append(newCandy, ignore_index=True)
-dataline = dataline.drop(columns = ['competitorname','winpercent'])
-
-pred_win = predWin_All_KNN(dataline)
-dataline['winpercent'] = pred_win[0]
-dataline
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>chocolate</th>
-      <th>fruity</th>
-      <th>caramel</th>
-      <th>peanutyalmondy</th>
-      <th>nougat</th>
-      <th>crispedricewafer</th>
-      <th>hard</th>
-      <th>bar</th>
-      <th>pluribus</th>
-      <th>sugarpercent</th>
-      <th>pricepercent</th>
-      <th>winpercent</th>
-    </tr>
-  </thead>
-  <tbody>
     <tr>
-      <th>0</th>
+      <th>1</th>
+      <td>1</td>
       <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
       <td>0</td>
+      <td>1</td>
       <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.402485</td>
+      <td>0.55712</td>
+      <td>0.7670</td>
+      <td>0.676316</td>
     </tr>
   </tbody>
 </table>
@@ -1045,5 +971,16 @@ dataline
 
 
 ```python
-
+plt.bar(['goodCandy','badCandy'],dataline['winpercent'], color='violet', alpha=0.8)
 ```
+
+
+
+
+    <BarContainer object of 2 artists>
+
+
+
+
+![png](README_files/README_36_1.png)
+
