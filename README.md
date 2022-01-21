@@ -508,15 +508,56 @@ print('The largest of ', silhouette_coefficients.index(max(silhouette_coefficien
 ![png](README_files/README_15_1.png)
 
 
-    The largest of  4  clusters is: Cluster  1
-    The largest of  11  clusters is: Cluster  1
+    The largest of  4  clusters is: Cluster  3
+    The largest of  11  clusters is: Cluster  5
 
 
 As we can see, the highest awp of 4 clusters is 63.8 with 25 datapoints; the highest awp of 11 clusters is 70.5 with 4 datapoints. Though the cluster with awp of 70.5 seems to be more beneficial, due to it containing only 4 datapoints, which is to little for a substantial analysis, we choose to analyze the features of the cluster wit awp=63.8 and 25 datapoints.
 
 
 ```python
-awpIdx = winRates.index(max(winRates))
+awpIdx = [winRates.index(max(winRates)), winRates.index(min(winRates))]
+clusterCandies = [pd.DataFrame(columns=candyDataAll.columns), pd.DataFrame(columns=candyDataAll.columns)]
+
+fig, ax = plt.subplots(1,2)
+fig.set_figwidth(15)
+fig.set_figheight(6.5)
+for i in range(2):
+    for k in cD[label==awpIdx[i]]:
+        clusterCandies[i] = clusterCandies[i].append(candyDataAll.loc[np.where(cD==k)[0][0]])
+    
+    clusterCandies[i] = clusterCandies[i].drop(columns=['winpercent','competitorname'])
+    vals = []
+    for factor in clusterCandies[i].columns:
+        vals.append(sum(clusterCandies[i][factor])/len(clusterCandies[i]))
+        
+        
+        colors = plt.cm.BuPu(np.linspace(0.2, 0.5, len(vals)))
+    bar_plt = ax[i].bar(range(0,len(vals)), vals, color=colors, tick_label=clusterCandies[i].columns)
+    ax[i].set_xticklabels(clusterCandies[i].columns, rotation = 'vertical')
+    ax[i].set_xlabel('Features')
+    ax[i].set_ylabel('Average occurency')
+    ax[i].set_title('Average of feature rate in cluster with awp = ' + str(awpIdx[i]))
+
+    for idx,bar_plt in enumerate(bar_plt):
+        height = bar_plt.get_height()
+        ax[i].text(bar_plt.get_x() + bar_plt.get_width()/2., height,
+                round(vals[idx],2),
+                ha='center', va='bottom', rotation=0)
+```
+
+
+```python
+
+```
+
+
+![png](README_files/README_18_0.png)
+
+
+
+```python
+awpIdx = winRates.index(min(winRates))
 clusterCandies = pd.DataFrame(columns=candyDataAll.columns)
 
 for k in cD[label==awpIdx]:
@@ -526,16 +567,14 @@ clusterCandies = clusterCandies.drop(columns=['winpercent','competitorname'])
 vals = []
 for factor in clusterCandies.columns:
     vals.append(sum(clusterCandies[factor])/len(clusterCandies))
-```
+    
 
-
-```python
 colors = plt.cm.BuPu(np.linspace(0.2, 0.5, len(vals)))
 bar_plt = plt.bar(range(0,len(vals)), vals, color=colors, tick_label=clusterCandies.columns)
 plt.xticks(rotation = 'vertical')
 plt.xlabel('Features')
 plt.ylabel('Average occurency in cluster')
-plt.title('Average of feature rate')
+plt.title('Average of feature rate at cluster with awp = ', awpIdx)
 
 for idx,bar_plt in enumerate(bar_plt):
         height = bar_plt.get_height()
@@ -545,7 +584,47 @@ for idx,bar_plt in enumerate(bar_plt):
 ```
 
 
-![png](README_files/README_18_0.png)
+    ---------------------------------------------------------------------------
+
+    TypeError                                 Traceback (most recent call last)
+
+    <ipython-input-35-80f8025884e8> in <module>
+         16 plt.xlabel('Features')
+         17 plt.ylabel('Average occurency in cluster')
+    ---> 18 plt.title('Average of feature rate at cluster with awp = ', awpIdx)
+         19 
+         20 for idx,bar_plt in enumerate(bar_plt):
+
+
+    ~\anaconda3\lib\site-packages\matplotlib\pyplot.py in title(label, fontdict, loc, pad, y, **kwargs)
+       3106 @_copy_docstring_and_deprecators(Axes.set_title)
+       3107 def title(label, fontdict=None, loc=None, pad=None, *, y=None, **kwargs):
+    -> 3108     return gca().set_title(
+       3109         label, fontdict=fontdict, loc=loc, pad=pad, y=y, **kwargs)
+       3110 
+
+
+    ~\anaconda3\lib\site-packages\matplotlib\axes\_axes.py in set_title(self, label, fontdict, loc, pad, y, **kwargs)
+        190         title.update(default)
+        191         if fontdict is not None:
+    --> 192             title.update(fontdict)
+        193         title.update(kwargs)
+        194         return title
+
+
+    ~\anaconda3\lib\site-packages\matplotlib\text.py in update(self, kwargs)
+        169         # docstring inherited
+        170         # make a copy so we do not mutate user input!
+    --> 171         kwargs = dict(kwargs)
+        172         sentinel = object()  # bbox can be None, so use another sentinel.
+        173         # Update fontproperties first, as it has lowest priority.
+
+
+    TypeError: 'int' object is not iterable
+
+
+
+![png](README_files/README_19_1.png)
 
 
 # Non-linear-regression
@@ -614,8 +693,8 @@ ax[1].set_title('MSE')
 ```
 
     Random Forest Regressor:
-    MAE = 0.22200323236407035
-    MSE = 0.07064229547377364
+    MAE = 0.225818520088181
+    MSE = 0.07158040367971631
     
     KNN:
     MAE = 0.18595293569411764
@@ -630,7 +709,7 @@ ax[1].set_title('MSE')
 
 
 
-![png](README_files/README_22_2.png)
+![png](README_files/README_23_2.png)
 
 
 ### Create pricepercent-predictor
@@ -666,8 +745,8 @@ ax[1].set_title('MSE')
 ```
 
     Random Forest Regressor:
-    MAE = 0.19182341317963567
-    MSE = 0.04882941777571
+    MAE = 0.1871743516000883
+    MSE = 0.04582781020011431
     
     KNN:
     MAE = 0.1706823507058824
@@ -682,7 +761,7 @@ ax[1].set_title('MSE')
 
 
 
-![png](README_files/README_24_2.png)
+![png](README_files/README_25_2.png)
 
 
 ### Create winpercent-predictor
@@ -720,8 +799,8 @@ ax[1].set_title('MSE')
 ```
 
     Random Forest Regressor:
-    MAE = 0.09566050884990222
-    MSE = 0.01492374841046988
+    MAE = 0.09401314936637274
+    MSE = 0.014845846164174245
     
     KNN:
     MAE = 0.09626410952941178
@@ -736,7 +815,7 @@ ax[1].set_title('MSE')
 
 
 
-![png](README_files/README_26_2.png)
+![png](README_files/README_27_2.png)
 
 
 ### Create Methods
@@ -756,6 +835,9 @@ def predWin_KNN(dataline):
     price = predPrice_KNN(dataline)
     dataline['sugarpercent'] = sugar
     dataline['pricepercent'] = price
+    return knn_regressor_w.predict(dataline)
+
+def predWin_All_KNN(dataline):
     return knn_regressor_w.predict(dataline)
 ```
 
@@ -783,7 +865,7 @@ plt.title("Feature importance")
 
 
 
-![png](README_files/README_30_1.png)
+![png](README_files/README_31_1.png)
 
 
 
@@ -818,14 +900,14 @@ plt.barh(columns, values, color='green', alpha=0.4)
 
 
 
-![png](README_files/README_31_1.png)
+![png](README_files/README_32_1.png)
 
 
 ### Predict New Candy
 
 
 ```python
-newCandy = {'competitorname': 'test', 'chocolate':1, 'fruity':0, 'caramel':0, 'peanutyalmondy':1, 'nougat':0, 'crispedricewafer':0, 'hard':0, 'bar':1, 'pluribus':0, 'sugarpercent':0.3, 'pricepercent':0.5, 'winpercent':0.4}
+newCandy = {'competitorname': 'test', 'chocolate':0, 'fruity':0, 'caramel':0, 'peanutyalmondy':0, 'nougat':0, 'crispedricewafer':0, 'hard':0, 'bar':0, 'pluribus':0, 'sugarpercent':0.3, 'pricepercent':0.5, 'winpercent':0.4}
 dataline = pd.DataFrame(columns= candyDataAll.columns)
 dataline = dataline.append(newCandy, ignore_index=True)
 dataline = dataline.drop(columns = ['competitorname', 'sugarpercent', 'pricepercent', 'winpercent'])
@@ -873,21 +955,95 @@ dataline
   <tbody>
     <tr>
       <th>0</th>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>1</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>1</td>
       <td>0</td>
-      <td>0.3458</td>
-      <td>0.6298</td>
-      <td>0.558472</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.3622</td>
+      <td>0.3484</td>
+      <td>0.395358</td>
     </tr>
   </tbody>
 </table>
 </div>
 
 
+
+
+```python
+newCandy = {'competitorname': 'test', 'chocolate':0, 'fruity':0, 'caramel':0, 'peanutyalmondy':0, 'nougat':0, 'crispedricewafer':0, 'hard':0, 'bar':0, 'pluribus':0, 'sugarpercent':0.0, 'pricepercent':0.0, 'winpercent':0.4}
+dataline = pd.DataFrame(columns= candyDataAll.columns)
+dataline = dataline.append(newCandy, ignore_index=True)
+dataline = dataline.drop(columns = ['competitorname','winpercent'])
+
+pred_win = predWin_All_KNN(dataline)
+dataline['winpercent'] = pred_win[0]
+dataline
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>chocolate</th>
+      <th>fruity</th>
+      <th>caramel</th>
+      <th>peanutyalmondy</th>
+      <th>nougat</th>
+      <th>crispedricewafer</th>
+      <th>hard</th>
+      <th>bar</th>
+      <th>pluribus</th>
+      <th>sugarpercent</th>
+      <th>pricepercent</th>
+      <th>winpercent</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.402485</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+
+```
